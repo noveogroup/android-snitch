@@ -29,6 +29,7 @@ android {
 dependencies {
     compile ('com.android.support:appcompat-v7:19.0.+')
     compile ('org.slf4j:slf4j-android:1.7.7')
+    compile 'com.netflix.rxjava:rxjava-android:0.18.3'
 }
 
 

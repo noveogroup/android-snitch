@@ -14,6 +14,9 @@ import com.taskadapter.redmineapi.bean.User;
 import java.io.File;
 import java.util.List;
 
+import rx.Observable;
+import rx.Subscriber;
+
 /**
  * Created by oisupov on 4/10/14.
  */
@@ -166,6 +169,26 @@ public class RedMineControllerWrapper {
                 return redmineManager.createIssue(String.valueOf(project.getId()), issue);
             }
         }.execute();
+
+
+//        Observable<Issue> observable = Observable.create(new Observable.OnSubscribe<Issue>() {
+//            @Override
+//            public void call(Subscriber<? super Issue> subscriber) {
+//                try {
+//                    if (pictureFilename != null) {
+//                        Attachment attachment = redmineManager.uploadAttachment("image/jpeg", new File(pictureFilename));
+//                        issue.getAttachments().add(attachment);
+//                    }
+//                    if (logsFilename != null) {
+//                        Attachment attachment = redmineManager.uploadAttachment("text", new File(logsFilename));
+//                        issue.getAttachments().add(attachment);
+//                    }
+//                    subscriber.onNext(redmineManager.createIssue(String.valueOf(project.getId()), issue));
+//                } catch (Exception e) {
+//                    subscriber.onError(e);
+//                }
+//            }
+//        });
     }
 
     public void getMemberships(final Project project, final GetMembershipsListener getMembershipsListener) {
@@ -205,5 +228,6 @@ public class RedMineControllerWrapper {
         }
 
         createIssue(issue.getProject(), editIssueListener, issue, pictureFilename, logsFilename);
+
     }
 }
