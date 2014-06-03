@@ -1,0 +1,10 @@
+.gradle
+.idea
+*.iml
+/local.properties
+/.idea/workspace.xml
+/gradle/
+.DS_Store
+gradle.properties
+gradlew
+gradlew.bat

@@ -1,0 +1,42 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+
+    <string name="app_name">My Module</string>
+    <string name="hello_world">Hello world!</string>
+    <string name="action_settings">Settings</string>
+    <string name="hint_message">enter message</string>
+    <string name="hint_title">enter title</string>
+    <string name="hint_attach_logs">attach logs</string>
+    <string name="hint_attach_screen_shot">attach screen shot</string>
+    <string name="menu_title_erase">Erase</string>
+    <string name="menu_title_revert">Revert</string>
+    <string name="menu_title_resize">Resize mode</string>
+    <string name="menu_title_draw">Draw mode</string>
+    <string name="menu_title_share">Share</string>
+    <string name="KEY_MARKS">MARKS</string>
+    <string name="speech_recognizer_dialog_speak_label">Speak..</string>
+    <string name="username">Username</string>
+    <string name="password">Password</string>
+    <string name="server">Redmine address</string>
+    <string name="save">Save</string>
+    <string name="cancel">Cancel</string>
+    <string name="credentials">Credentials</string>
+    <string name="assignee">Assignee</string>
+    <string name="new_ticket">New ticket</string>
+    <string name="menu_title_manage">Manage</string>
+    <string name="select">Выбрать</string>
+    <string name="crash_activity_process">Process</string>
+    <string name="no_email_clients_found">There are no email clients installed.</string>
+    <string name="email_client_chooser_title">Send mail...</string>
+    <string name="screen_shot_tab">Screen shot</string>
+    <string name="log_tab">Log</string>
+    <string name="redmine_fail">Fail</string>
+    <string name="redmine_success">Success</string>
+    <string name="redmine_select_ticket">Select ticket</string>
+
+    <string-array name="share_options">
+        <item>send by mail</item>
+        <item>post redmine</item>
+    </string-array>
+
+</resources>
