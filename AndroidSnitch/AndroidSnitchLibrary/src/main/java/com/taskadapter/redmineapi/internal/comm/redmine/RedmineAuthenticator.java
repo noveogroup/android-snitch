@@ -5,7 +5,7 @@ import java.io.UnsupportedEncodingException;
 import com.taskadapter.redmineapi.internal.comm.Communicator;
 import com.taskadapter.redmineapi.internal.comm.ContentHandler;
 import org.apache.http.HttpRequest;
-import com.taskadapter.redmineapi.RedmineException;
+import com.taskadapter.redmineapi.RedMineException;
 import com.taskadapter.redmineapi.RedmineInternalError;
 
 public class RedmineAuthenticator<K> implements Communicator<K> {
@@ -48,7 +48,7 @@ public class RedmineAuthenticator<K> implements Communicator<K> {
 
 	@Override
 	public <R> R sendRequest(HttpRequest request, ContentHandler<K, R> handler)
-			throws RedmineException {
+			throws RedMineException {
 		if (authKey != null)
 			request.addHeader("Authorization", authKey);
 		return peer.sendRequest(request, handler);

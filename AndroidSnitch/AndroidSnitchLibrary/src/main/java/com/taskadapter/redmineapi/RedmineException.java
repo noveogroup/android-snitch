@@ -1,20 +1,20 @@
 package com.taskadapter.redmineapi;
 
-public class RedmineException extends Exception {
+public class RedMineException extends Exception {
 	private static final long serialVersionUID = -1592189045756043062L;
 
-	public RedmineException() {
+	public RedMineException() {
     }
 
-    public RedmineException(String message, Throwable cause) {
+    public RedMineException(String message, Throwable cause) {
         super(message, cause);
     }
 
-    public RedmineException(String message) {
+    public RedMineException(String message) {
         super(message);
     }
 
-    public RedmineException(Throwable cause) {
+    public RedMineException(Throwable cause) {
         super(cause);
     }
 }

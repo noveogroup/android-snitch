@@ -12,7 +12,6 @@ import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
 
-import com.taskadapter.redmineapi.RedmineFormatException;
 import com.taskadapter.redmineapi.bean.Attachment;
 import com.taskadapter.redmineapi.bean.Changeset;
 import com.taskadapter.redmineapi.bean.CustomField;
@@ -227,7 +226,7 @@ public class RedmineJSONParser {
 	 * @param object
 	 *            object to parse.
 	 * @return parsed tracker.
-	 * @throws RedmineFormatException
+	 * @throws com.taskadapter.redmineapi.RedMineFormatException
 	 *             if object is not a valid tracker.
 	 */
 	public static Tracker parseTracker(JSONObject object) throws JSONException {
@@ -242,7 +241,7 @@ public class RedmineJSONParser {
 	 * @param object
 	 *            object to parse.
 	 * @return parsed tracker.
-	 * @throws RedmineFormatException
+	 * @throws com.taskadapter.redmineapi.RedMineFormatException
 	 *             if object is not a valid tracker.
 	 */
 	public static IssueStatus parseStatus(JSONObject object)
@@ -637,7 +636,7 @@ public class RedmineJSONParser {
 	 *            object to get a field from.
 	 * @param field
 	 *            field to get a value from.
-	 * @throws RedmineFormatException
+	 * @throws com.taskadapter.redmineapi.RedMineFormatException
 	 *             if value is not valid
 	 */
 	private static Date getDateOrNull(JSONObject obj, String field)
@@ -674,7 +673,7 @@ public class RedmineJSONParser {
 	 *            object to get a field from.
 	 * @param field
 	 *            field to get a value from.
-	 * @throws RedmineFormatException
+	 * @throws com.taskadapter.redmineapi.RedMineFormatException
 	 *             if value is not valid
 	 */
 	private static Date getShortDateOrNull(JSONObject obj, String field)

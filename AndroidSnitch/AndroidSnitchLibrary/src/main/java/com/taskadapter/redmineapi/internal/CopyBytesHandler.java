@@ -4,8 +4,8 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStream;
 
-import com.taskadapter.redmineapi.RedmineCommunicationException;
-import com.taskadapter.redmineapi.RedmineException;
+import com.taskadapter.redmineapi.RedMineCommunicationException;
+import com.taskadapter.redmineapi.RedMineException;
 import com.taskadapter.redmineapi.internal.comm.BasicHttpResponse;
 import com.taskadapter.redmineapi.internal.comm.ContentHandler;
 
@@ -23,7 +23,7 @@ public final class CopyBytesHandler implements ContentHandler<BasicHttpResponse,
 
 	@Override
 	public Void processContent(BasicHttpResponse content)
-			throws RedmineException {
+			throws RedMineException {
 		final byte[] buffer = new byte[4096 * 4];
 		int readed;
 		try {
@@ -35,7 +35,7 @@ public final class CopyBytesHandler implements ContentHandler<BasicHttpResponse,
 				input.close();
 			}
 		} catch (IOException e) {
-			throw new RedmineCommunicationException(e);
+			throw new RedMineCommunicationException(e);
 		}
 		return null;
 	}

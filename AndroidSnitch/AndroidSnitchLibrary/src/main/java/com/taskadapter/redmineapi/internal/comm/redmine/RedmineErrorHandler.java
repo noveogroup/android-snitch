@@ -5,16 +5,16 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
+import com.taskadapter.redmineapi.RedMineFormatException;
+import com.taskadapter.redmineapi.RedMineProcessingException;
 import com.taskadapter.redmineapi.internal.comm.BasicHttpResponse;
 import com.taskadapter.redmineapi.internal.comm.ContentHandler;
 import org.apache.http.HttpStatus;
 import org.json.JSONException;
 import com.taskadapter.redmineapi.NotAuthorizedException;
 import com.taskadapter.redmineapi.NotFoundException;
-import com.taskadapter.redmineapi.RedmineAuthenticationException;
-import com.taskadapter.redmineapi.RedmineException;
-import com.taskadapter.redmineapi.RedmineFormatException;
-import com.taskadapter.redmineapi.RedmineProcessingException;
+import com.taskadapter.redmineapi.RedMineAuthenticationException;
+import com.taskadapter.redmineapi.RedMineException;
 import com.taskadapter.redmineapi.internal.RedmineJSONParser;
 import com.taskadapter.redmineapi.internal.comm.Communicators;
 
@@ -31,10 +31,10 @@ public final class RedmineErrorHandler implements
 
 	@Override
 	public BasicHttpResponse processContent(BasicHttpResponse httpResponse)
-			throws RedmineException {
+			throws RedMineException {
 		final int responseCode = httpResponse.getResponseCode();
 		if (responseCode == HttpStatus.SC_UNAUTHORIZED) {
-			throw new RedmineAuthenticationException(
+			throw new RedMineAuthenticationException(
 					"Authorization error. Please check if you provided a valid API access key or Login and Password and REST API service is enabled on the server.");
 		}
 		if (responseCode == HttpStatus.SC_FORBIDDEN) {
@@ -53,9 +53,9 @@ public final class RedmineErrorHandler implements
 				errors = RedmineJSONParser.parseErrors(getContent(httpResponse));
 				errors = remap(errors);
 			} catch (JSONException e) {
-				throw new RedmineFormatException("Bad redmine error response", e);
+				throw new RedMineFormatException("Bad redmine error response", e);
 			}
-			throw new RedmineProcessingException(errors);
+			throw new RedMineProcessingException(errors);
 		}
 		return httpResponse;
 	}
@@ -72,7 +72,7 @@ public final class RedmineErrorHandler implements
 		return guess != null ? guess : message;
 	}
 
-	private String getContent(BasicHttpResponse entity) throws RedmineException {
+	private String getContent(BasicHttpResponse entity) throws RedMineException {
 		return Communicators.contentReader().processContent(entity);
 	}
 

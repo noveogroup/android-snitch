@@ -1,17 +1,17 @@
 package com.taskadapter.redmineapi.internal.comm;
 
 import android.util.Log;
-import com.taskadapter.redmineapi.RedmineException;
-import com.taskadapter.redmineapi.RedmineFormatException;
+import com.taskadapter.redmineapi.RedMineException;
+import com.taskadapter.redmineapi.RedMineFormatException;
+import com.taskadapter.redmineapi.RedMineTransportException;
 import com.taskadapter.redmineapi.RedmineOptions;
-import com.taskadapter.redmineapi.RedmineTransportException;
+
 import org.apache.http.*;
 import org.apache.http.client.ClientProtocolException;
 import org.apache.http.client.HttpClient;
 import org.apache.http.client.methods.HttpUriRequest;
 import org.apache.http.conn.ClientConnectionManager;
 import org.apache.http.impl.client.DefaultHttpClient;
-import org.apache.http.util.EntityUtils;
 
 import java.io.IOException;
 
@@ -71,7 +71,7 @@ public class BaseCommunicator implements Communicator<HttpResponse> {
 	 */
 	@Override
 	public <R> R sendRequest(HttpRequest request,
-			ContentHandler<HttpResponse, R> handler) throws RedmineException {
+			ContentHandler<HttpResponse, R> handler) throws RedMineException {
 		Log.d(DEBUG_TAG, request.getRequestLine().toString());
 
 		request.addHeader("Accept-Encoding", "gzip");
@@ -87,9 +87,9 @@ public class BaseCommunicator implements Communicator<HttpResponse> {
 
 			}
 		} catch (ClientProtocolException e1) {
-			throw new RedmineFormatException(e1);
+			throw new RedMineFormatException(e1);
 		} catch (IOException e1) {
-			throw new RedmineTransportException("Cannot fetch data from "
+			throw new RedMineTransportException("Cannot fetch data from "
 					+ getMessageURI(request) + " : "
 							+ e1.toString(), e1);
 		}

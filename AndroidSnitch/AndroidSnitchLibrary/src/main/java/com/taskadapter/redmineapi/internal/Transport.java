@@ -27,11 +27,9 @@ import org.json.JSONObject;
 import org.json.JSONStringer;
 
 import com.taskadapter.redmineapi.NotFoundException;
-import com.taskadapter.redmineapi.RedmineAuthenticationException;
-import com.taskadapter.redmineapi.RedmineException;
-import com.taskadapter.redmineapi.RedmineFormatException;
+import com.taskadapter.redmineapi.RedMineException;
+import com.taskadapter.redmineapi.RedMineFormatException;
 import com.taskadapter.redmineapi.RedmineInternalError;
-import com.taskadapter.redmineapi.RedmineManager;
 import com.taskadapter.redmineapi.RedmineOptions;
 import com.taskadapter.redmineapi.bean.Group;
 import com.taskadapter.redmineapi.bean.Identifiable;
@@ -174,7 +172,7 @@ public final class Transport {
                 Communicators.<String>identityHandler());
 	}
 
-	public User getCurrentUser(NameValuePair... params) throws RedmineException {
+	public User getCurrentUser(NameValuePair... params) throws RedMineException {
 		URI uri = getURIConfigurator().createURI("users/current.json", params);
 		HttpGet http = new HttpGet(uri);
 		String response = getCommunicator().sendRequest(http);
@@ -189,11 +187,11 @@ public final class Transport {
 	 * @param params
 	 *            name params.
 	 * @return object to use.
-	 * @throws RedmineException
+	 * @throws com.taskadapter.redmineapi.RedMineException
 	 *             if something goes wrong.
 	 */
 	public <T> T addObject(T object, NameValuePair... params)
-			throws RedmineException {
+			throws RedMineException {
 		final EntityConfig<T> config = getConfig(object.getClass());
 		URI uri = getURIConfigurator().getObjectsURI(object.getClass(), params);
 		HttpPost httpPost = new HttpPost(uri);
@@ -215,11 +213,11 @@ public final class Transport {
 	 * @param params
 	 *            name params.
 	 * @return object to use.
-	 * @throws RedmineException
+	 * @throws com.taskadapter.redmineapi.RedMineException
 	 *             if something goes wrong.
 	 */
 	public <T> T addChildEntry(Class<?> parentClass, String parentId, T object,
-			NameValuePair... params) throws RedmineException {
+			NameValuePair... params) throws RedMineException {
 		final EntityConfig<T> config = getConfig(object.getClass());
 		URI uri = getURIConfigurator().getChildObjectsURI(parentClass,
 				parentId, object.getClass(), params);
@@ -239,7 +237,7 @@ public final class Transport {
 	 * @since 1.8.0
 	 */
 	public <T extends Identifiable> void updateObject(T obj,
-			NameValuePair... params) throws RedmineException {
+			NameValuePair... params) throws RedMineException {
 		final EntityConfig<T> config = getConfig(obj.getClass());
 		final URI uri = getURIConfigurator().getObjectURI(obj.getClass(),
 				Integer.toString(obj.getId()));
@@ -261,11 +259,11 @@ public final class Transport {
 	 *            object to use.
 	 * @param value
 	 *            child object id.
-	 * @throws RedmineException
+	 * @throws com.taskadapter.redmineapi.RedMineException
 	 *             if something goes wrong.
 	 */
 	public <T> void deleteChildId(Class<?> parentClass, String parentId, T object, 
-                Integer value) throws RedmineException {
+                Integer value) throws RedMineException {
             URI uri = getURIConfigurator().getChildIdURI(parentClass,
                     parentId, object.getClass(), value);
             HttpDelete httpDelete = new HttpDelete(uri);
@@ -280,11 +278,11 @@ public final class Transport {
 	 *            object class.
 	 * @param id
 	 *            object id.
-	 * @throws RedmineException
+	 * @throws com.taskadapter.redmineapi.RedMineException
 	 *             if something goes wrong.
 	 */
 	public <T extends Identifiable> void deleteObject(Class<T> classs, String id)
-			throws RedmineException {
+			throws RedMineException {
 		final URI uri = getURIConfigurator().getObjectURI(classs, id);
 		final HttpDelete http = new HttpDelete(uri);
 		getCommunicator().sendRequest(http);
@@ -297,15 +295,15 @@ public final class Transport {
 	 *            item key
 	 * @param args
 	 *            extra arguments.
-	 * @throws RedmineAuthenticationException
+	 * @throws com.taskadapter.redmineapi.RedMineAuthenticationException
 	 *             invalid or no API access key is used with the server, which
 	 *             requires authorization. Check the constructor arguments.
 	 * @throws NotFoundException
 	 *             the object with the given key is not found
-	 * @throws RedmineException
+	 * @throws com.taskadapter.redmineapi.RedMineException
 	 */
 	public <T> T getObject(Class<T> classs, String key, NameValuePair... args)
-			throws RedmineException {
+			throws RedMineException {
 		final EntityConfig<T> config = getConfig(classs);
 		final URI uri = getURIConfigurator().getObjectURI(classs, key, args);
 		final HttpGet http = new HttpGet(uri);
@@ -322,12 +320,12 @@ public final class Transport {
 	 * @param handler
 	 *            content handler.
 	 * @return handler result.
-	 * @throws RedmineException
+	 * @throws com.taskadapter.redmineapi.RedMineException
 	 *             if something goes wrong.
 	 */
 	public <R> R download(String uri,
 			ContentHandler<BasicHttpResponse, R> handler)
-			throws RedmineException {
+			throws RedMineException {
 		final HttpGet request = new HttpGet(uri);
 		return errorCheckingCommunicator.sendRequest(request, handler);
 	}
@@ -338,10 +336,10 @@ public final class Transport {
 	 * @param content
 	 *            content stream.
 	 * @return uploaded item token.
-	 * @throws RedmineException
+	 * @throws com.taskadapter.redmineapi.RedMineException
 	 *             if something goes wrong.
 	 */
-	public String upload(InputStream content) throws RedmineException {
+	public String upload(InputStream content) throws RedMineException {
 		final URI uploadURI = getURIConfigurator().getUploadURI();
 		final HttpPost request = new HttpPost(uploadURI);
 		final AbstractHttpEntity entity = new InputStreamEntity(content, -1);
@@ -361,20 +359,20 @@ public final class Transport {
 	 *            item key
 	 * @param args
 	 *            extra arguments.
-	 * @throws RedmineAuthenticationException
+	 * @throws com.taskadapter.redmineapi.RedMineAuthenticationException
 	 *             invalid or no API access key is used with the server, which
 	 *             requires authorization. Check the constructor arguments.
 	 * @throws NotFoundException
 	 *             the object with the given key is not found
-	 * @throws RedmineException
+	 * @throws com.taskadapter.redmineapi.RedMineException
 	 */
 	public <T> T getObject(Class<T> classs, Integer key, NameValuePair... args)
-			throws RedmineException {
+			throws RedMineException {
 		return getObject(classs, key.toString(), args);
 	}
 
 	public <T> List<T> getObjectsList(Class<T> objectClass,
-			NameValuePair... params) throws RedmineException {
+			NameValuePair... params) throws RedMineException {
 		return getObjectsList(objectClass, Arrays.asList(params));
 	}
 
@@ -384,7 +382,7 @@ public final class Transport {
 	 * @return objects list, never NULL
 	 */
 	public <T> List<T> getObjectsList(Class<T> objectClass,
-			Collection<? extends NameValuePair> params) throws RedmineException {
+			Collection<? extends NameValuePair> params) throws RedMineException {
 		final EntityConfig<T> config = getConfig(objectClass);
 		final List<T> result = new ArrayList<T>();
 
@@ -426,7 +424,7 @@ public final class Transport {
 				totalObjectsFoundOnServer = JsonInput.getInt(responseObject,
 						KEY_TOTAL_COUNT);
 			} catch (JSONException e) {
-				throw new RedmineFormatException(e);
+				throw new RedMineFormatException(e);
 			}
 
 			if (foundItems.size() == 0) {
@@ -454,7 +452,7 @@ public final class Transport {
 	 *            target class.
 	 */
 	public <T> List<T> getChildEntries(Class<?> parentClass, String parentId,
-			Class<T> classs) throws RedmineException {
+			Class<T> classs) throws RedMineException {
 		final EntityConfig<T> config = getConfig(classs);
 		final URI uri = getURIConfigurator().getChildObjectsURI(parentClass,
 				parentId, classs, new BasicNameValuePair("limit", String
@@ -468,7 +466,7 @@ public final class Transport {
 			return JsonInput.getListNotNull(responseObject,
 					config.multiObjectName, config.parser);
 		} catch (JSONException e) {
-			throw new RedmineFormatException("Bad categories response " + response, e);
+			throw new RedMineFormatException("Bad categories response " + response, e);
 		}
 	}
 
@@ -484,7 +482,7 @@ public final class Transport {
 		this.objectsPerPage = pageSize;
 	}
 	
-	public void addUserToGroup(int userId, int groupId) throws RedmineException {
+	public void addUserToGroup(int userId, int groupId) throws RedMineException {
 		Log.d(DEBUG_TAG, "adding user " + userId + " to group " + groupId + "...");
 		URI uri = getURIConfigurator().getChildObjectsURI(Group.class, Integer.toString(groupId), User.class);
 		HttpPost httpPost = new HttpPost(uri);
@@ -501,7 +499,7 @@ public final class Transport {
 		return;
 	}
 
-	public void addWatcherToIssue(int watcherId, int issueId) throws RedmineException {
+	public void addWatcherToIssue(int watcherId, int issueId) throws RedMineException {
 		Log.d(DEBUG_TAG, "adding watcher " + watcherId + " to issue " + issueId + "...");
 		URI uri = getURIConfigurator().getChildObjectsURI(Issue.class, Integer.toString(issueId), Watcher.class);
 		HttpPost httpPost = new HttpPost(uri);
@@ -519,16 +517,16 @@ public final class Transport {
 	}
 
 	private SimpleCommunicator<String> getCommunicator()
-			throws RedmineException {
+			throws RedMineException {
 		return communicator;
 	}
 
 	private static <T> T parseResponse(String response, String tag,
-                                     JsonObjectParser<T> parser) throws RedmineFormatException {
+                                     JsonObjectParser<T> parser) throws RedMineFormatException {
 		try {
 			return parser.parse(RedmineJSONParser.getResponseSingleObject(response, tag));
 		} catch (JSONException e) {
-			throw new RedmineFormatException(e);
+			throw new RedMineFormatException(e);
 		}
 	}
 

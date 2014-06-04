@@ -7,8 +7,8 @@ import java.util.zip.InflaterInputStream;
 
 import org.apache.http.HttpEntity;
 import org.apache.http.HttpResponse;
-import com.taskadapter.redmineapi.RedmineException;
-import com.taskadapter.redmineapi.RedmineTransportException;
+import com.taskadapter.redmineapi.RedMineException;
+import com.taskadapter.redmineapi.RedMineTransportException;
 
 /**
  * Transport encoding decoder.
@@ -21,7 +21,7 @@ final class TransportDecoder implements
 
 	@Override
 	public BasicHttpResponse processContent(HttpResponse content)
-			throws RedmineException {
+			throws RedMineException {
 		final HttpEntity entity = content.getEntity();
 		final String charset = HttpUtil.getCharset(entity);
 		final String encoding = HttpUtil.getEntityEncoding(entity);
@@ -31,7 +31,7 @@ final class TransportDecoder implements
 					.getStatusCode(), decodeStream(encoding, initialStream),
 					charset);
 		} catch (IOException e) {
-			throw new RedmineTransportException(e);
+			throw new RedMineTransportException(e);
 		}
 	}
 

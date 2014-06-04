@@ -1,6 +1,6 @@
 package com.taskadapter.redmineapi;
 
-public class NotFoundException extends RedmineException {
+public class NotFoundException extends RedMineException {
 
     private static final long serialVersionUID = 1L;
 

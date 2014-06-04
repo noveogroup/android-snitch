@@ -1,6 +1,6 @@
 package com.taskadapter.redmineapi.internal.comm;
 
-import com.taskadapter.redmineapi.RedmineException;
+import com.taskadapter.redmineapi.RedMineException;
 
 /**
  * Redmine content handler.
@@ -15,8 +15,8 @@ public interface ContentHandler<K, R> {
 	 * @param content
 	 *            content to process.
 	 * @return processed content.
-	 * @throws RedmineException
+	 * @throws com.taskadapter.redmineapi.RedMineException
 	 *             if something goes wrong.
 	 */
-	R processContent(K content) throws RedmineException;
+	R processContent(K content) throws RedMineException;
 }

@@ -1,7 +1,6 @@
 package com.noveogroup.screen_shot_report.controllers;
 
-import android.os.AsyncTask;
-
+import com.taskadapter.redmineapi.RedMineException;
 import com.taskadapter.redmineapi.RedmineManager;
 import com.taskadapter.redmineapi.bean.Attachment;
 import com.taskadapter.redmineapi.bean.Changeset;
@@ -11,91 +10,23 @@ import com.taskadapter.redmineapi.bean.Membership;
 import com.taskadapter.redmineapi.bean.Project;
 import com.taskadapter.redmineapi.bean.User;
 
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
 import java.io.File;
 import java.util.List;
 
 import rx.Observable;
 import rx.Subscriber;
+import rx.android.schedulers.AndroidSchedulers;
+import rx.schedulers.Schedulers;
 
 /**
  * Created by oisupov on 4/10/14.
  */
 public class RedMineControllerWrapper {
 
-    public static interface DataListener<T> {
-        public void onSuccess(final T t);
-
-        public void onFail(final Exception e);
-    }
-
-    public static class DataListenerDefaultImplementation<T> implements DataListener<T> {
-
-        @Override
-        public void onSuccess(T t) {
-
-        }
-
-        @Override
-        public void onFail(Exception e) {
-
-        }
-    }
-
-    public static class GetIssuesListener extends DataListenerDefaultImplementation<List<Issue>> {
-    }
-
-    public static class GetProjectsListener extends DataListenerDefaultImplementation<List<Project>> {
-    }
-
-    public static class EditIssueListener extends DataListenerDefaultImplementation<Issue> {
-    }
-
-    public static class GetMembershipsListener extends DataListenerDefaultImplementation<List<Membership>> {
-    }
-
-    public static class GetStatusesListener extends DataListenerDefaultImplementation<List<IssueStatus>> {
-    }
-
-    public abstract static class RedmineManagerTask<T> extends AsyncTask<Void, T, T> {
-
-        private Exception e;
-        private DataListener<T> dataListener;
-
-        protected RedmineManagerTask(DataListener<T> dataListener) {
-            this.dataListener = dataListener;
-        }
-
-        public void setDataListener(DataListener<T> dataListener) {
-            this.dataListener = dataListener;
-        }
-
-        @Override
-        protected T doInBackground(java.lang.Void... params) {
-            try {
-                T t = getData();
-                return t;
-            } catch (Exception e) {
-                this.e = e;
-                return null;
-            }
-        }
-
-        protected abstract T getData() throws Exception;
-
-        @Override
-        protected void onPostExecute(T t) {
-            super.onPostExecute(t);
-            if (dataListener != null) {
-                if (t != null) {
-                    dataListener.onSuccess(t);
-                } else {
-                    dataListener.onFail(e);
-                }
-            } else {
-                throw new RuntimeException("dataListener == null");
-            }
-        }
-    }
+    private Logger logger = LoggerFactory.getLogger(RedMineControllerWrapper.class);
 
     private String login;
     private String password;
@@ -116,28 +47,39 @@ public class RedMineControllerWrapper {
         redmineManager.setPassword(password);
     }
 
-    public void getListOfProjects(final GetProjectsListener getProjectsListener) {
-        new RedmineManagerTask<List<Project>>(getProjectsListener) {
+    public Observable<List<Project>> getListOfProjects() {
+        return updateObservable(new Observable.OnSubscribe<List<Project>>() {
             @Override
-            protected List<Project> getData() throws Exception {
-                return redmineManager.getProjects();
+            public void call(Subscriber<? super List<Project>> subscriber) {
+                try {
+                    subscriber.onNext(redmineManager.getProjects());
+                    subscriber.onCompleted();
+                } catch (RedMineException e) {
+                    logger.trace(e.getMessage(), e);
+                    subscriber.onError(e);
+                }
             }
-        }.execute();
+        });
     }
 
-    public void getListOfIssues(final Project project, final GetIssuesListener getIssuesListener) {
-        new RedmineManagerTask<List<Issue>>(getIssuesListener) {
+    public Observable<List<Issue>> getListOfIssues(final Project project) {
+        return updateObservable(new Observable.OnSubscribe<List<Issue>>() {
             @Override
-            protected List<Issue> getData() throws Exception {
-                return redmineManager.getIssues(String.valueOf(project.getId()), null);
+            public void call(Subscriber<? super List<Issue>> subscriber) {
+                try {
+                    subscriber.onNext(redmineManager.getIssues(String.valueOf(project.getId()), null));
+                    subscriber.onCompleted();
+                } catch (RedMineException e) {
+                    logger.trace(e.getMessage(), e);
+                    subscriber.onError(e);
+                }
             }
-        }.execute();
+        });
     }
 
-    public void postNewIssue(final Project project, final User assignee, final String statusName,
-                             final String title, final String message,
-                             final String pictureFilename, final String logsFilename,
-                             final EditIssueListener editIssueListener) {
+    public Observable<Issue> postNewIssue(final Project project, final User assignee, final String statusName,
+                                          final String title, final String message,
+                                          final String pictureFilename, final String logsFilename) {
         final Issue issue = new Issue();
         issue.setProject(project);
         issue.setSubject(title);
@@ -151,73 +93,70 @@ public class RedMineControllerWrapper {
             issue.setStatusName(statusName);
         }
 
-        createIssue(project, editIssueListener, issue, pictureFilename, logsFilename);
+        return createIssue(project, issue, pictureFilename, logsFilename);
     }
 
-    private void createIssue(final Project project, final EditIssueListener editIssueListener, final Issue issue, final String pictureFilename, final String logsFilename) {
-        new RedmineManagerTask<Issue>(editIssueListener) {
+    private Observable<Issue> createIssue(final Project project, final Issue issue, final String pictureFilename, final String logsFilename) {
+        return updateObservable(new Observable.OnSubscribe<Issue>() {
             @Override
-            protected Issue getData() throws Exception {
-                if (pictureFilename != null) {
-                    Attachment attachment = redmineManager.uploadAttachment("image/jpeg", new File(pictureFilename));
-                    issue.getAttachments().add(attachment);
+            public void call(Subscriber<? super Issue> subscriber) {
+                try {
+                    if (pictureFilename != null) {
+                        Attachment attachment = redmineManager.uploadAttachment("image/jpeg", new File(pictureFilename));
+                        issue.getAttachments().add(attachment);
+                    }
+                    if (logsFilename != null) {
+                        Attachment attachment = redmineManager.uploadAttachment("text", new File(logsFilename));
+                        issue.getAttachments().add(attachment);
+                    }
+                    subscriber.onNext(redmineManager.createIssue(String.valueOf(project.getId()), issue));
+                    subscriber.onCompleted();
+                } catch (Exception e) {
+                    logger.trace(e.getMessage(), e);
+                    subscriber.onError(e);
                 }
-                if (logsFilename != null) {
-                    Attachment attachment = redmineManager.uploadAttachment("text", new File(logsFilename));
-                    issue.getAttachments().add(attachment);
+            }
+        });
+    }
+
+    public Observable<List<Membership>> getMemberships(final Project project) {
+        return updateObservable(new Observable.OnSubscribe<List<Membership>>() {
+            @Override
+            public void call(Subscriber<? super List<Membership>> subscriber) {
+                try {
+                    subscriber.onNext(redmineManager.getMemberships(project));
+                    subscriber.onCompleted();
+                } catch (RedMineException e) {
+                    logger.trace(e.getMessage(), e);
+                    subscriber.onError(e);
                 }
-                return redmineManager.createIssue(String.valueOf(project.getId()), issue);
             }
-        }.execute();
-
-
-//        Observable<Issue> observable = Observable.create(new Observable.OnSubscribe<Issue>() {
-//            @Override
-//            public void call(Subscriber<? super Issue> subscriber) {
-//                try {
-//                    if (pictureFilename != null) {
-//                        Attachment attachment = redmineManager.uploadAttachment("image/jpeg", new File(pictureFilename));
-//                        issue.getAttachments().add(attachment);
-//                    }
-//                    if (logsFilename != null) {
-//                        Attachment attachment = redmineManager.uploadAttachment("text", new File(logsFilename));
-//                        issue.getAttachments().add(attachment);
-//                    }
-//                    subscriber.onNext(redmineManager.createIssue(String.valueOf(project.getId()), issue));
-//                } catch (Exception e) {
-//                    subscriber.onError(e);
-//                }
-//            }
-//        });
+        });
     }
 
-    public void getMemberships(final Project project, final GetMembershipsListener getMembershipsListener) {
-        new RedmineManagerTask<List<Membership>>(getMembershipsListener) {
+    public Observable<List<IssueStatus>> getStatuses() {
+        return updateObservable(new Observable.OnSubscribe<List<IssueStatus>>() {
             @Override
-            protected List<Membership> getData() throws Exception {
-                return redmineManager.getMemberships(project);
+            public void call(Subscriber<? super List<IssueStatus>> subscriber) {
+                try {
+                    subscriber.onNext(redmineManager.getStatuses());
+                    subscriber.onCompleted();
+                } catch (RedMineException e) {
+                    logger.trace(e.getMessage(), e);
+                    subscriber.onError(e);
+                }
             }
-        }.execute();
+        });
     }
 
-    public void getStatuses(final GetStatusesListener getStatusesListener) {
-        new RedmineManagerTask<List<IssueStatus>>(getStatusesListener) {
-            @Override
-            protected List<IssueStatus> getData() throws Exception {
-                return redmineManager.getStatuses();
-            }
-        }.execute();
-    }
-
-    public void postCommentToTicket(final Issue issue, final User assignee, final String statusName,
-                                    final String title, final String message,
-                                    final String pictureFilename, final String logsFilename,
-                                    final EditIssueListener editIssueListener) {
-        List<Changeset> changesets = issue.getChangesets();
+    public Observable<Issue> postCommentToTicket(final Issue issue, final User assignee, final String statusName,
+                                                 final String title, final String message,
+                                                 final String pictureFilename, final String logsFilename) {
+        List<Changeset> changesetList = issue.getChangesets();
         Changeset changeset = new Changeset();
         changeset.setComments(title + "\n" + message);
-        changesets.add(changeset);
-        issue.setChangesets(changesets);
+        changesetList.add(changeset);
+        issue.setChangesets(changesetList);
 
         if (assignee != null) {
             issue.setAssignee(assignee);
@@ -227,7 +166,10 @@ public class RedMineControllerWrapper {
             issue.setStatusName(statusName);
         }
 
-        createIssue(issue.getProject(), editIssueListener, issue, pictureFilename, logsFilename);
+        return createIssue(issue.getProject(), issue, pictureFilename, logsFilename);
+    }
 
+    private <T> Observable<T> updateObservable(Observable.OnSubscribe<T> onSubscribe) {
+        return Observable.create(onSubscribe).subscribeOn(Schedulers.io()).observeOn(AndroidSchedulers.mainThread());
     }
 }

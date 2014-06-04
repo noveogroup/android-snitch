@@ -1,6 +1,6 @@
 package com.taskadapter.redmineapi.internal.comm;
 
-import com.taskadapter.redmineapi.RedmineException;
+import com.taskadapter.redmineapi.RedMineException;
 
 /**
  * Composing content handler.
@@ -21,7 +21,7 @@ final class ComposingHandler<K, I, R> implements ContentHandler<K, R> {
 	}
 
 	@Override
-	public R processContent(K content) throws RedmineException {
+	public R processContent(K content) throws RedMineException {
 		return outer.processContent(inner.processContent(content));
 	}
 

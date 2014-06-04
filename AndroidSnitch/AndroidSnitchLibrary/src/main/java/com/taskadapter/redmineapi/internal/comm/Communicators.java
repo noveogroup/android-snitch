@@ -8,8 +8,8 @@ import java.io.UnsupportedEncodingException;
 
 import org.apache.http.HttpResponse;
 
-import com.taskadapter.redmineapi.RedmineException;
-import com.taskadapter.redmineapi.RedmineTransportException;
+import com.taskadapter.redmineapi.RedMineException;
+import com.taskadapter.redmineapi.RedMineTransportException;
 
 /**
  * Communicator utilities.
@@ -20,7 +20,7 @@ import com.taskadapter.redmineapi.RedmineTransportException;
 public final class Communicators {
 	private static final ContentHandler<Object, Object> IDENTITY_HANDLER = new ContentHandler<Object, Object>() {
 		@Override
-		public Object processContent(Object content) throws RedmineException {
+		public Object processContent(Object content) throws RedMineException {
 			return content;
 		}
 	};
@@ -30,12 +30,12 @@ public final class Communicators {
 	private static final ContentHandler<BasicHttpResponse, Reader> CHARACTER_DECODER = new ContentHandler<BasicHttpResponse, Reader>() {
 		@Override
 		public Reader processContent(BasicHttpResponse content)
-				throws RedmineException {
+				throws RedMineException {
 			final String charset = content.getCharset();
 			try {
 				return new InputStreamReader(content.getStream(), charset);
 			} catch (UnsupportedEncodingException e) {
-				throw new RedmineTransportException(
+				throw new RedMineTransportException(
 						"Unsupported response charset " + charset, e);
 			}
 		}
@@ -43,14 +43,14 @@ public final class Communicators {
 	
 	private static final ContentHandler<HttpResponse, Integer> HTTP_RESPONSE_CODE = new ContentHandler<HttpResponse, Integer>() {
 		@Override
-		public Integer processContent(HttpResponse content) throws RedmineException {
+		public Integer processContent(HttpResponse content) throws RedMineException {
 			return content.getStatusLine().getStatusCode();
 		}
 	};
 
 	private static final ContentHandler<Reader, String> READ_CHARS = new ContentHandler<Reader, String>() {
 		@Override
-		public String processContent(Reader content) throws RedmineException {
+		public String processContent(Reader content) throws RedMineException {
 			return readAll(content);
 		}
 	};
@@ -58,7 +58,7 @@ public final class Communicators {
 	private static final ContentHandler<BasicHttpResponse, String> CHAR_CONTENT_READER = compose(
 			READ_CHARS, CHARACTER_DECODER);
 
-	static String readAll(Reader r) throws RedmineException {
+	static String readAll(Reader r) throws RedMineException {
 		final StringWriter writer = new StringWriter();
 		final char[] buffer = new char[4096];
 		int readed;
@@ -70,7 +70,7 @@ public final class Communicators {
 			writer.close();
 			return writer.toString();
 		} catch (IOException e) {
-			throw new RedmineTransportException(e);
+			throw new RedMineTransportException(e);
 		}
 	}
 

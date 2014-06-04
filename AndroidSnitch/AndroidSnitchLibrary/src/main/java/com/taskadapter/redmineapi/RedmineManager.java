@@ -146,12 +146,12 @@ public class RedmineManager {
      * @param projectKey The project "identifier". This is a string key like "project-ABC", NOT a database numeric ID.
      * @param issue      the Issue object to create on the server.
      * @return the newly created Issue.
-     * @throws RedmineAuthenticationException invalid or no API access key is used with the server, which
+     * @throws RedMineAuthenticationException invalid or no API access key is used with the server, which
      *                                 requires authorization. Check the constructor arguments.
      * @throws NotFoundException       the project with the given projectKey is not found
-     * @throws RedmineException
+     * @throws RedMineException
      */
-    public Issue createIssue(String projectKey, Issue issue) throws RedmineException {
+    public Issue createIssue(String projectKey, Issue issue) throws RedMineException {
 		final Project oldProject = issue.getProject();
 		final Project newProject = new Project();
 		newProject.setIdentifier(projectKey);
@@ -169,11 +169,11 @@ public class RedmineManager {
      * Load the list of projects available to the user, which is represented by the API access key.
      *
      * @return list of Project objects
-     * @throws RedmineAuthenticationException invalid or no API access key is used with the server, which
+     * @throws RedMineAuthenticationException invalid or no API access key is used with the server, which
      *                                 requires authorization. Check the constructor arguments.
-     * @throws RedmineException
+     * @throws RedMineException
      */
-    public List<Project> getProjects() throws RedmineException {
+    public List<Project> getProjects() throws RedMineException {
         try {
 			return transport.getObjectsList(Project.class,
 					new BasicNameValuePair("include", "trackers"));
@@ -186,12 +186,12 @@ public class RedmineManager {
      * There could be several issues with the same summary, so the method returns List.
      *
      * @return empty list if not issues with this summary field exist, never NULL
-     * @throws RedmineAuthenticationException invalid or no API access key is used with the server, which
+     * @throws RedMineAuthenticationException invalid or no API access key is used with the server, which
      *                                 requires authorization. Check the constructor arguments.
      * @throws NotFoundException
-     * @throws RedmineException
+     * @throws RedMineException
      */
-    public List<Issue> getIssuesBySummary(String projectKey, String summaryField) throws RedmineException {
+    public List<Issue> getIssuesBySummary(String projectKey, String summaryField) throws RedMineException {
         if ((projectKey != null) && (projectKey.length() > 0)) {
 			return transport.getObjectsList(Issue.class,
 					new BasicNameValuePair("subject", summaryField),
@@ -207,12 +207,12 @@ public class RedmineManager {
      *
      * @param pParameters the http parameters key/value pairs to append to the rest api request
      * @return empty list if not issues with this summary field exist, never NULL
-     * @throws RedmineAuthenticationException invalid or no API access key is used with the server, which
+     * @throws RedMineAuthenticationException invalid or no API access key is used with the server, which
      *                                 requires authorization. Check the constructor arguments.
      * @throws NotFoundException
-     * @throws RedmineException
+     * @throws RedMineException
      */
-    public List<Issue> getIssues(Map<String, String> pParameters) throws RedmineException {
+    public List<Issue> getIssues(Map<String, String> pParameters) throws RedMineException {
         Set<NameValuePair> params = new HashSet<NameValuePair>();
 
         for (final Entry<String, String> param : pParameters.entrySet()) {
@@ -226,12 +226,12 @@ public class RedmineManager {
      * @param id      the Redmine issue ID
      * @param include list of "includes". e.g. "relations", "journals", ...
      * @return Issue object
-     * @throws RedmineAuthenticationException invalid or no API access key is used with the server, which
+     * @throws RedMineAuthenticationException invalid or no API access key is used with the server, which
      *                                 requires authorization. Check the constructor arguments.
      * @throws NotFoundException       the issue with the given id is not found on the server
-     * @throws RedmineException
+     * @throws RedMineException
      */
-    public Issue getIssueById(Integer id, INCLUDE... include) throws RedmineException {
+    public Issue getIssueById(Integer id, INCLUDE... include) throws RedMineException {
         String value = Joiner.join(",", include);
 		return transport.getObject(Issue.class, id, new BasicNameValuePair("include", value));
     }
@@ -239,28 +239,28 @@ public class RedmineManager {
     /**
      * @param projectKey string key like "project-ABC", NOT a database numeric ID
      * @return Redmine's project
-     * @throws RedmineAuthenticationException invalid or no API access key is used with the server, which
+     * @throws RedMineAuthenticationException invalid or no API access key is used with the server, which
      *                                 requires authorization. Check the constructor arguments.
      * @throws NotFoundException       the project with the given key is not found
-     * @throws RedmineException
+     * @throws RedMineException
      */
-    public Project getProjectByKey(String projectKey) throws RedmineException {
+    public Project getProjectByKey(String projectKey) throws RedMineException {
 		return transport.getObject(Project.class, projectKey,
 				new BasicNameValuePair("include", "trackers"));
     }
 
     /**
      * @param projectKey string key like "project-ABC", NOT a database numeric ID
-     * @throws RedmineAuthenticationException invalid or no API access key is used with the server, which
+     * @throws RedMineAuthenticationException invalid or no API access key is used with the server, which
      *                                 requires authorization. Check the constructor arguments.
      * @throws NotFoundException       if the project with the given key is not found
-     * @throws RedmineException
+     * @throws RedMineException
      */
-    public void deleteProject(String projectKey) throws RedmineException {
+    public void deleteProject(String projectKey) throws RedMineException {
 		transport.deleteObject(Project.class, projectKey);
     }
 
-    public void deleteIssue(Integer id) throws RedmineException {
+    public void deleteIssue(Integer id) throws RedMineException {
 		transport.deleteObject(Issue.class, Integer.toString(id));
     }
 
@@ -270,12 +270,12 @@ public class RedmineManager {
      *                   represented by the API access key (if the Redmine project requires authorization).
      *                   This parameter is <b>optional<b>, NULL can be provided to get all available issues.
      * @return list of Issue objects
-     * @throws RedmineAuthenticationException invalid or no API access key is used with the server, which
+     * @throws RedMineAuthenticationException invalid or no API access key is used with the server, which
      *                                 requires authorization. Check the constructor arguments.
-     * @throws RedmineException
+     * @throws RedMineException
      * @see com.taskadapter.redmineapi.bean.Issue
      */
-    public List<Issue> getIssues(String projectKey, Integer queryId, INCLUDE... include) throws RedmineException {
+    public List<Issue> getIssues(String projectKey, Integer queryId, INCLUDE... include) throws RedMineException {
 		List<NameValuePair> params = new ArrayList<NameValuePair>();
         if (queryId != null) {
             params.add(new BasicNameValuePair("query_id", String.valueOf(queryId)));
@@ -296,7 +296,7 @@ public class RedmineManager {
       *
       * @since 1.8.0
       */
-    public void update(Identifiable obj) throws RedmineException {
+    public void update(Identifiable obj) throws RedMineException {
         validate(obj);
 		transport.updateObject(obj);
     }
@@ -331,11 +331,11 @@ public class RedmineManager {
      *
      * @param project project to create on the server
      * @return the newly created Project object.
-     * @throws RedmineAuthenticationException invalid or no API access key is used with the server, which
+     * @throws RedMineAuthenticationException invalid or no API access key is used with the server, which
      *                                 requires authorization. Check the constructor arguments.
-     * @throws RedmineException
+     * @throws RedMineException
      */
-    public Project createProject(Project project) throws RedmineException {
+    public Project createProject(Project project) throws RedMineException {
 		return transport.addObject(project, new BasicNameValuePair("include",
 				"trackers"));
     }
@@ -361,12 +361,12 @@ public class RedmineManager {
      * <p><b>This operation requires "Redmine Administrator" permission.</b>
      *
      * @return list of User objects
-     * @throws RedmineAuthenticationException invalid or no API access key is used with the server, which
+     * @throws RedMineAuthenticationException invalid or no API access key is used with the server, which
      *                                 requires authorization. Check the constructor arguments.
      * @throws NotFoundException
-     * @throws RedmineException
+     * @throws RedMineException
      */
-    public List<User> getUsers() throws RedmineException {
+    public List<User> getUsers() throws RedMineException {
 		return transport.getObjectsList(User.class, new BasicNameValuePair(
 				"include", "memberships"));
     }
@@ -374,7 +374,7 @@ public class RedmineManager {
     /**
      * This does NOT require Admin privileges by default Redmine installation (tested with Redmine 2.0.3).
      */
-    public User getUserById(Integer userId) throws RedmineException {
+    public User getUserById(Integer userId) throws RedMineException {
 		return transport.getObject(User.class, userId, new BasicNameValuePair(
 				"include", "memberships"));
     }
@@ -382,22 +382,22 @@ public class RedmineManager {
     /**
      * @return the current user logged into Redmine
      */
-    public User getCurrentUser() throws RedmineException {
+    public User getCurrentUser() throws RedMineException {
 		return transport.getCurrentUser();
     }
 
-    public User createUser(User user) throws RedmineException {
+    public User createUser(User user) throws RedMineException {
 		return transport.addObject(user);
     }
 
     /**
      * @param userId user identifier (numeric ID)
-     * @throws RedmineAuthenticationException invalid or no API access key is used with the server, which
+     * @throws RedMineAuthenticationException invalid or no API access key is used with the server, which
      *                                 requires authorization. Check the constructor arguments.
      * @throws NotFoundException       if the user with the given id is not found
-     * @throws RedmineException
+     * @throws RedMineException
      */
-    public void deleteUser(Integer userId) throws RedmineException {
+    public void deleteUser(Integer userId) throws RedMineException {
 		transport.deleteObject(User.class, Integer.toString(userId));
     }
     
@@ -406,12 +406,12 @@ public class RedmineManager {
      * <p><b>This operation requires "Redmine Administrator" permission.</b>
      *
      * @return list of User objects
-     * @throws RedmineAuthenticationException invalid or no API access key is used with the server, which
+     * @throws RedMineAuthenticationException invalid or no API access key is used with the server, which
      *                                 requires authorization. Check the constructor arguments.
      * @throws NotFoundException
-     * @throws RedmineException
+     * @throws RedMineException
      */
-    public List<Group> getGroups() throws RedmineException {
+    public List<Group> getGroups() throws RedMineException {
 		return transport.getObjectsList(Group.class);
     }
 
@@ -423,9 +423,9 @@ public class RedmineManager {
      * @param id
      *            the id of the group
      * @return the group
-     * @throws RedmineException
+     * @throws RedMineException
      */
-    public Group getGroupById(int id) throws RedmineException {
+    public Group getGroupById(int id) throws RedMineException {
         return transport.getObject(Group.class, id);
     }
     
@@ -433,9 +433,9 @@ public class RedmineManager {
      * Creates a new group.
      * <p><b>This operation requires "Redmine Administrator" permission.</b>
      * @return created group.
-     * @throws RedmineException
+     * @throws RedMineException
      */
-    public Group createGroup(Group base) throws RedmineException {
+    public Group createGroup(Group base) throws RedMineException {
         return transport.addObject(base);
     }
 
@@ -443,34 +443,34 @@ public class RedmineManager {
      * Deletes a group.
      * <p><b>This operation requires "Redmine Administrator" permission.</b>
      * @return created group.
-     * @throws RedmineException
+     * @throws RedMineException
      */
-    public void deleteGroup(Group base) throws RedmineException {
+    public void deleteGroup(Group base) throws RedMineException {
         transport.deleteObject(Group.class, base.getId().toString());
     }
     
-    public List<TimeEntry> getTimeEntries() throws RedmineException {
+    public List<TimeEntry> getTimeEntries() throws RedMineException {
 		return transport.getObjectsList(TimeEntry.class);
     }
 
     /**
      * @param id the database Id of the TimeEntry record
      */
-    public TimeEntry getTimeEntry(Integer id) throws RedmineException {
+    public TimeEntry getTimeEntry(Integer id) throws RedMineException {
 		return transport.getObject(TimeEntry.class, id);
     }
 
-    public List<TimeEntry> getTimeEntriesForIssue(Integer issueId) throws RedmineException {
+    public List<TimeEntry> getTimeEntriesForIssue(Integer issueId) throws RedMineException {
 		return transport.getObjectsList(TimeEntry.class,
 				new BasicNameValuePair("issue_id", Integer.toString(issueId)));
     }
 
-    public TimeEntry createTimeEntry(TimeEntry obj) throws RedmineException {
+    public TimeEntry createTimeEntry(TimeEntry obj) throws RedMineException {
         validate(obj);
 		return transport.addObject(obj);
     }
 
-    public void deleteTimeEntry(Integer id) throws RedmineException {
+    public void deleteTimeEntry(Integer id) throws RedMineException {
 		transport.deleteObject(TimeEntry.class, Integer.toString(id));
     }
 
@@ -484,7 +484,7 @@ public class RedmineManager {
      * <p/>
      * <p>This REST API feature was added in Redmine 1.3.0. See http://www.redmine.org/issues/5737
      */
-    public List<SavedQuery> getSavedQueries(String projectKey) throws RedmineException {
+    public List<SavedQuery> getSavedQueries(String projectKey) throws RedMineException {
 		Set<NameValuePair> params = new HashSet<NameValuePair>();
 
 		if ((projectKey != null) && (projectKey.length() > 0)) {
@@ -499,11 +499,11 @@ public class RedmineManager {
      * <p/>
      * <p>This REST API feature was added in Redmine 1.3.0. See http://www.redmine.org/issues/5737
      */
-    public List<SavedQuery> getSavedQueries() throws RedmineException {
+    public List<SavedQuery> getSavedQueries() throws RedMineException {
 		return transport.getObjectsList(SavedQuery.class);
     }
 
-    public IssueRelation createRelation(Integer issueId, Integer issueToId, String type) throws RedmineException {
+    public IssueRelation createRelation(Integer issueId, Integer issueToId, String type) throws RedMineException {
         IssueRelation toCreate = new IssueRelation();
         toCreate.setIssueId(issueId);
         toCreate.setIssueToId(issueToId);
@@ -515,14 +515,14 @@ public class RedmineManager {
     /**
      * Delete Issue Relation with the given ID.
      */
-    public void deleteRelation(Integer id) throws RedmineException {
+    public void deleteRelation(Integer id) throws RedMineException {
 		transport.deleteObject(IssueRelation.class, Integer.toString(id));
     }
 
     /**
      * Delete all issue's relations
      */
-    public void deleteIssueRelations(Issue redmineIssue) throws RedmineException {
+    public void deleteIssueRelations(Issue redmineIssue) throws RedMineException {
         for (IssueRelation relation : redmineIssue.getRelations()) {
             deleteRelation(relation.getId());
         }
@@ -533,7 +533,7 @@ public class RedmineManager {
      *
      * @param id issue ID
      */
-    public void deleteIssueRelationsByIssueId(Integer id) throws RedmineException {
+    public void deleteIssueRelationsByIssueId(Integer id) throws RedMineException {
         Issue issue = getIssueById(id, INCLUDE.relations);
         deleteIssueRelations(issue);
     }
@@ -542,11 +542,11 @@ public class RedmineManager {
      * Delivers a list of existing {@link com.taskadapter.redmineapi.bean.IssueStatus}es.
      *
      * @return a list of existing {@link com.taskadapter.redmineapi.bean.IssueStatus}es.
-     * @throws RedmineAuthenticationException thrown in case something went wrong while trying to login
-     * @throws RedmineException        thrown in case something went wrong in Redmine
+     * @throws RedMineAuthenticationException thrown in case something went wrong while trying to login
+     * @throws RedMineException        thrown in case something went wrong in Redmine
      * @throws NotFoundException       thrown in case an object can not be found
      */
-    public List<IssueStatus> getStatuses() throws RedmineException {
+    public List<IssueStatus> getStatuses() throws RedMineException {
 		return transport.getObjectsList(IssueStatus.class);
     }
 
@@ -558,11 +558,11 @@ public class RedmineManager {
      * @param version the {@link com.taskadapter.redmineapi.bean.Version}. Must contain a {@link com.taskadapter.redmineapi.bean.Project}.
      * @return the new {@link com.taskadapter.redmineapi.bean.Version} created by Redmine
      * @throws IllegalArgumentException thrown in case the version does not contain a project.
-     * @throws RedmineAuthenticationException  thrown in case something went wrong while trying to login
-     * @throws RedmineException         thrown in case something went wrong in Redmine
+     * @throws RedMineAuthenticationException  thrown in case something went wrong while trying to login
+     * @throws RedMineException         thrown in case something went wrong in Redmine
      * @throws NotFoundException        thrown in case an object can not be found
      */
-    public Version createVersion(Version version) throws RedmineException {
+    public Version createVersion(Version version) throws RedMineException {
         // check project
 		if (version.getProject() == null
 				|| version.getProject().getId() == null) {
@@ -577,11 +577,11 @@ public class RedmineManager {
      * deletes a new {@link com.taskadapter.redmineapi.bean.Version} from the {@link com.taskadapter.redmineapi.bean.Project} contained. <br/>
      *
      * @param version the {@link com.taskadapter.redmineapi.bean.Version}.
-     * @throws RedmineAuthenticationException thrown in case something went wrong while trying to login
-     * @throws RedmineException        thrown in case something went wrong in Redmine
+     * @throws RedMineAuthenticationException thrown in case something went wrong while trying to login
+     * @throws RedMineException        thrown in case something went wrong in Redmine
      * @throws NotFoundException       thrown in case an object can not be found
      */
-    public void deleteVersion(Version version) throws RedmineException {
+    public void deleteVersion(Version version) throws RedMineException {
 		transport
 				.deleteObject(Version.class, Integer.toString(version.getId()));
     }
@@ -591,17 +591,17 @@ public class RedmineManager {
      *
      * @param projectID the ID of the {@link com.taskadapter.redmineapi.bean.Project}
      * @return the list of {@link com.taskadapter.redmineapi.bean.Version}s of the {@link com.taskadapter.redmineapi.bean.Project}
-     * @throws RedmineAuthenticationException thrown in case something went wrong while trying to login
-     * @throws RedmineException        thrown in case something went wrong in Redmine
+     * @throws RedMineAuthenticationException thrown in case something went wrong while trying to login
+     * @throws RedMineException        thrown in case something went wrong in Redmine
      * @throws NotFoundException       thrown in case an object can not be found
      */
-    public List<Version> getVersions(int projectID) throws RedmineException {
+    public List<Version> getVersions(int projectID) throws RedMineException {
 		return transport.getChildEntries(Project.class,
 				Integer.toString(projectID), Version.class);
     }
 
     // TODO add test
-    public Version getVersionById(int versionId) throws RedmineException {
+    public Version getVersionById(int versionId) throws RedMineException {
 		return transport.getObject(Version.class, versionId);
     }
 
@@ -610,11 +610,11 @@ public class RedmineManager {
      *
      * @param projectID the ID of the {@link com.taskadapter.redmineapi.bean.Project}
      * @return the list of {@link com.taskadapter.redmineapi.bean.IssueCategory}s of the {@link com.taskadapter.redmineapi.bean.Project}
-     * @throws RedmineAuthenticationException thrown in case something went wrong while trying to login
-     * @throws RedmineException        thrown in case something went wrong in Redmine
+     * @throws RedMineAuthenticationException thrown in case something went wrong while trying to login
+     * @throws RedMineException        thrown in case something went wrong in Redmine
      * @throws NotFoundException       thrown in case an object can not be found
      */
-    public List<IssueCategory> getCategories(int projectID) throws RedmineException {
+    public List<IssueCategory> getCategories(int projectID) throws RedMineException {
 		return transport.getChildEntries(Project.class,
 				Integer.toString(projectID), IssueCategory.class);
     }
@@ -627,11 +627,11 @@ public class RedmineManager {
      * @param category the {@link com.taskadapter.redmineapi.bean.IssueCategory}. Must contain a {@link com.taskadapter.redmineapi.bean.Project}.
      * @return the new {@link com.taskadapter.redmineapi.bean.IssueCategory} created by Redmine
      * @throws IllegalArgumentException thrown in case the category does not contain a project.
-     * @throws RedmineAuthenticationException  thrown in case something went wrong while trying to login
-     * @throws RedmineException         thrown in case something went wrong in Redmine
+     * @throws RedMineAuthenticationException  thrown in case something went wrong while trying to login
+     * @throws RedMineException         thrown in case something went wrong in Redmine
      * @throws NotFoundException        thrown in case an object can not be found
      */
-    public IssueCategory createCategory(IssueCategory category) throws RedmineException {
+    public IssueCategory createCategory(IssueCategory category) throws RedMineException {
 		if (category.getProject() == null
 				|| category.getProject().getId() == null) {
 			throw new IllegalArgumentException(
@@ -646,22 +646,22 @@ public class RedmineManager {
      * deletes an {@link com.taskadapter.redmineapi.bean.IssueCategory}. <br/>
      *
      * @param category the {@link com.taskadapter.redmineapi.bean.IssueCategory}.
-     * @throws RedmineAuthenticationException thrown in case something went wrong while trying to login
-     * @throws RedmineException        thrown in case something went wrong in Redmine
+     * @throws RedMineAuthenticationException thrown in case something went wrong while trying to login
+     * @throws RedMineException        thrown in case something went wrong in Redmine
      * @throws NotFoundException       thrown in case an object can not be found
      */
-    public void deleteCategory(IssueCategory category) throws RedmineException {
+    public void deleteCategory(IssueCategory category) throws RedMineException {
 		transport.deleteObject(IssueCategory.class,
 				Integer.toString(category.getId()));
     }
 
     /**
      * @return a list of all {@link com.taskadapter.redmineapi.bean.Tracker}s available
-     * @throws RedmineAuthenticationException thrown in case something went wrong while trying to login
-     * @throws RedmineException        thrown in case something went wrong in Redmine
+     * @throws RedMineAuthenticationException thrown in case something went wrong while trying to login
+     * @throws RedMineException        thrown in case something went wrong in Redmine
      * @throws NotFoundException       thrown in case an object can not be found
      */
-    public List<Tracker> getTrackers() throws RedmineException {
+    public List<Tracker> getTrackers() throws RedMineException {
 		return transport.getObjectsList(Tracker.class);
     }
 
@@ -670,16 +670,16 @@ public class RedmineManager {
      *
      * @param attachmentID the ID
      * @return the {@link com.taskadapter.redmineapi.bean.Attachment}
-     * @throws RedmineAuthenticationException thrown in case something went wrong while trying to login
-     * @throws RedmineException        thrown in case something went wrong in Redmine
+     * @throws RedMineAuthenticationException thrown in case something went wrong while trying to login
+     * @throws RedMineException        thrown in case something went wrong in Redmine
      * @throws NotFoundException       thrown in case an object can not be found
      */
-    public Attachment getAttachmentById(int attachmentID) throws RedmineException {
+    public Attachment getAttachmentById(int attachmentID) throws RedMineException {
 		return transport.getObject(Attachment.class, attachmentID);
     }
 
 	public void downloadAttachmentContent(Attachment issueAttachment,
-			OutputStream stream) throws RedmineException {
+			OutputStream stream) throws RedMineException {
 		transport.download(issueAttachment.getContentURL(),
 				new CopyBytesHandler(stream));
 	}
@@ -689,10 +689,10 @@ public class RedmineManager {
      *
      * @param issueAttachment the {@link com.taskadapter.redmineapi.bean.Attachment}
      * @return the content of the attachment as a byte[] array
-     * @throws RedmineCommunicationException thrown in case the download fails
+     * @throws RedMineCommunicationException thrown in case the download fails
      */
 	public byte[] downloadAttachmentContent(Attachment issueAttachment)
-			throws RedmineException {
+			throws RedMineException {
 		final ByteArrayOutputStream baos = new ByteArrayOutputStream();
 		downloadAttachmentContent(issueAttachment, baos);
 		try {
@@ -716,7 +716,7 @@ public class RedmineManager {
      * @return list of news objects
      * @see com.taskadapter.redmineapi.bean.News
      */
-    public List<News> getNews(String projectKey) throws RedmineException {
+    public List<News> getNews(String projectKey) throws RedMineException {
         Set<NameValuePair> params = new HashSet<NameValuePair>();
         if ((projectKey != null) && (projectKey.length() > 0)) {
             params.add(new BasicNameValuePair("project_id", projectKey));
@@ -741,7 +741,7 @@ public class RedmineManager {
 	 * @param content
 	 *            attachment content stream.
 	 * @return attachment content.
-	 * @throws RedmineException
+	 * @throws RedMineException
 	 *             if something goes wrong.
 	 * @throws java.io.IOException
 	 *             if input cannot be read. This exception cannot be thrown yet
@@ -750,7 +750,7 @@ public class RedmineManager {
 	 *             reading errors and transport errors.
 	 */
 	public Attachment uploadAttachment(String fileName, String contentType,
-			InputStream content) throws RedmineException, IOException {
+			InputStream content) throws RedMineException, IOException {
 		final InputStream wrapper = new MarkedInputStream(content,
 				"uploadStream");
 		final String token;
@@ -761,7 +761,7 @@ public class RedmineManager {
 			result.setContentType(contentType);
 			result.setFileName(fileName);
 			return result;
-		} catch (RedmineException e) {
+		} catch (RedMineException e) {
 			unwrapException(e, "uploadStream");
 			throw e;
 		}
@@ -773,7 +773,7 @@ public class RedmineManager {
 	 * @param tag
 	 *            target tag.
 	 */
-	private void unwrapException(RedmineException exception, String tag) throws IOException {
+	private void unwrapException(RedMineException exception, String tag) throws IOException {
 		Throwable e = exception;
 		while (e != null) {
 			if (e instanceof MarkedIOException) {
@@ -795,13 +795,13 @@ public class RedmineManager {
 	 * @param content
 	 *            attachment content stream.
 	 * @return attachment content.
-	 * @throws RedmineException
+	 * @throws RedMineException
 	 *             if something goes wrong.
 	 * @throws java.io.IOException
 	 *             if input cannot be read.
 	 */
 	public Attachment uploadAttachment(String fileName, String contentType,
-			byte[] content) throws RedmineException, IOException {
+			byte[] content) throws RedMineException, IOException {
 		final InputStream is = new ByteArrayInputStream(content);
 		try {
 			return uploadAttachment(fileName, contentType, is);
@@ -822,13 +822,13 @@ public class RedmineManager {
 	 * @param content
 	 *            attachment content stream.
 	 * @return attachment content.
-	 * @throws RedmineException
+	 * @throws RedMineException
 	 *             if something goes wrong.
 	 * @throws java.io.IOException
 	 *             if input cannot be read.
 	 */
 	public Attachment uploadAttachment(String contentType, File content)
-			throws RedmineException, IOException {
+			throws RedMineException, IOException {
 		final InputStream is = new FileInputStream(content);
 		try {
 			return uploadAttachment(content.getName(), contentType, is);
@@ -837,30 +837,30 @@ public class RedmineManager {
 		}
 	}
 
-	public List<Role> getRoles() throws RedmineException {
+	public List<Role> getRoles() throws RedMineException {
 		return transport.getObjectsList(Role.class);
 	}
 	
-	public Role getRoleById(int id) throws RedmineException {
+	public Role getRoleById(int id) throws RedMineException {
 	    return transport.getObject(Role.class, id);
 	}
 	
-	public List<IssuePriority> getIssuePriorities() throws RedmineException {
+	public List<IssuePriority> getIssuePriorities() throws RedMineException {
 	    return transport.getObjectsList(IssuePriority.class);
 	}
 
-    public List<TimeEntryActivity> getTimeEntryActivities() throws RedmineException {
+    public List<TimeEntryActivity> getTimeEntryActivities() throws RedMineException {
         return transport.getObjectsList(TimeEntryActivity.class);
     }
     
 	public List<Membership> getMemberships(String project)
-			throws RedmineException {
+			throws RedMineException {
 		return transport.getChildEntries(Project.class, project,
 				Membership.class);
 	}
 
 	public List<Membership> getMemberships(Project project)
-			throws RedmineException {
+			throws RedMineException {
 		return getMemberships(getProjectKey(project));
 	}
 
@@ -869,9 +869,9 @@ public class RedmineManager {
 	 * 
 	 * @param membership
 	 *            membership.
-	 * @throws RedmineException
+	 * @throws RedMineException
 	 */
-	public void addMembership(Membership membership) throws RedmineException {
+	public void addMembership(Membership membership) throws RedMineException {
 		final Project project = membership.getProject();
 		if (project == null)
 			throw new IllegalArgumentException("Project must be set");
@@ -881,15 +881,15 @@ public class RedmineManager {
 				membership);
 	}
 
-	public Membership getMembership(int id) throws RedmineException {
+	public Membership getMembership(int id) throws RedMineException {
 		return transport.getObject(Membership.class, id);
 	}
 
-	public void deleteMembership(int id) throws RedmineException {
+	public void deleteMembership(int id) throws RedMineException {
 		transport.deleteObject(Membership.class, Integer.toString(id));
 	}
 
-	public void delete(Membership membership) throws RedmineException {
+	public void delete(Membership membership) throws RedMineException {
 		transport.deleteObject(Membership.class, membership.getId().toString());
 	}
 
@@ -900,9 +900,9 @@ public class RedmineManager {
 	 *            - The user being added.
 	 * @param group
 	 *            - The new group of the user.
-	 * @throws RedmineException
+	 * @throws RedMineException
 	 */
-	public void addUserToGroup(User user, Group group) throws RedmineException {
+	public void addUserToGroup(User user, Group group) throws RedMineException {
 		transport.addUserToGroup(user.getId(), group.getId());
 	}
 
@@ -911,11 +911,11 @@ public class RedmineManager {
 				.getIdentifier();
 	}
 
-    public void addWatcherToIssue(Watcher watcher, Issue issue) throws RedmineException {
+    public void addWatcherToIssue(Watcher watcher, Issue issue) throws RedMineException {
         transport.addWatcherToIssue(watcher.getId(), issue.getId());
     }
 
-    public void deleteWatcherFromIssue(Watcher watcher, Issue issue) throws RedmineException {
+    public void deleteWatcherFromIssue(Watcher watcher, Issue issue) throws RedMineException {
         transport.deleteChildId(Issue.class, Integer.toString(issue.getId()), watcher, watcher.getId() );
     }
 }

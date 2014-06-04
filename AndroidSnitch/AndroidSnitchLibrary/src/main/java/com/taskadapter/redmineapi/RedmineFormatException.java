@@ -1,17 +1,17 @@
 package com.taskadapter.redmineapi;
 
-public class RedmineFormatException extends RedmineCommunicationException {
+public class RedMineFormatException extends RedMineCommunicationException {
 	private static final long serialVersionUID = 4024202727798727085L;
 
-	public RedmineFormatException(String message) {
+	public RedMineFormatException(String message) {
 		super(message);
 	}
 
-	public RedmineFormatException(Throwable cause) {
+	public RedMineFormatException(Throwable cause) {
         super(cause);
     }
 
-	public RedmineFormatException(String message, Throwable cause) {
+	public RedMineFormatException(String message, Throwable cause) {
 		super(message, cause);
 	}
 }

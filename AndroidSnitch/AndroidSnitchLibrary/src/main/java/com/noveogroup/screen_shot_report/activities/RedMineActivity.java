@@ -6,7 +6,6 @@ import android.support.v7.app.ActionBarActivity;
 import android.text.Editable;
 import android.text.TextUtils;
 import android.text.TextWatcher;
-import android.util.Log;
 import android.view.Menu;
 import android.view.MenuItem;
 import android.view.View;
@@ -20,15 +19,15 @@ import android.widget.SpinnerAdapter;
 import android.widget.TextView;
 import android.widget.Toast;
 
-import com.noveogroup.screen_shot_report.controllers.RedMineControllerWrapper;
-import com.noveogroup.screen_shot_report.utils.OptionsManager;
-import com.noveogroup.screen_shot_report.utils.DialogUtils;
-import com.noveogroup.screen_shot_report.controllers.PreferencesController;
 import com.noveogroup.screen_shot_report.R;
 import com.noveogroup.screen_shot_report.ReportData;
 import com.noveogroup.screen_shot_report.adapters.AssigneeAdapter;
 import com.noveogroup.screen_shot_report.adapters.IssueAdapter;
 import com.noveogroup.screen_shot_report.adapters.StatusAdapter;
+import com.noveogroup.screen_shot_report.controllers.PreferencesController;
+import com.noveogroup.screen_shot_report.controllers.RedMineControllerWrapper;
+import com.noveogroup.screen_shot_report.utils.DialogUtils;
+import com.noveogroup.screen_shot_report.utils.OptionsManager;
 import com.taskadapter.redmineapi.bean.Issue;
 import com.taskadapter.redmineapi.bean.IssueStatus;
 import com.taskadapter.redmineapi.bean.Membership;
@@ -38,20 +37,30 @@ import com.taskadapter.redmineapi.bean.User;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import java.util.Iterator;
 import java.util.List;
+import java.util.Vector;
+
+import rx.Observable;
+import rx.Observer;
+import rx.Subscriber;
+import rx.Subscription;
+import rx.functions.Func3;
 
 /**
  * Created by oisupov on 4/4/14.
  */
 public class RedMineActivity extends ActionBarActivity {
 
+    private List<Subscription> subscriptions = new Vector<Subscription>();
+
     private EditText issue;
-    private ListView issues;
+    private ListView issuesView;
 
     private Spinner status;
     private Spinner assignee;
 
-    private RedMineControllerWrapper redMineControllerWrapper;
+    private volatile RedMineControllerWrapper redMineControllerWrapper;
 
     private Project project;
     private CheckBox newTicket;
@@ -83,7 +92,7 @@ public class RedMineActivity extends ActionBarActivity {
                 }
 
                 @Override
-                public void onError(Exception e) {
+                public void onError(Throwable e) {
                     finish();
                 }
             });
@@ -105,13 +114,13 @@ public class RedMineActivity extends ActionBarActivity {
             }
         });
 
-        issues = (ListView) findViewById(R.id.issues);
+        issuesView = (ListView) findViewById(R.id.issues);
         issue = (EditText) findViewById(R.id.issue);
 
-        issues.setOnItemClickListener(new AdapterView.OnItemClickListener() {
+        issuesView.setOnItemClickListener(new AdapterView.OnItemClickListener() {
             @Override
             public void onItemClick(AdapterView<?> parent, View view, int position, long id) {
-                issues.setSelection(position);
+                issuesView.setSelection(position);
                 onSelectIssue((Issue) parent.getItemAtPosition(position));
             }
         });
@@ -133,7 +142,7 @@ public class RedMineActivity extends ActionBarActivity {
 
             @Override
             public void afterTextChanged(Editable s) {
-                issues.setFilterText(s.toString());
+                issuesView.setFilterText(s.toString());
             }
         });
 
@@ -145,18 +154,20 @@ public class RedMineActivity extends ActionBarActivity {
     }
 
     private void loadProject() {
-        redMineControllerWrapper.getListOfProjects(new RedMineControllerWrapper.GetProjectsListener() {
-
+        Subscription subscribe = redMineControllerWrapper.getListOfProjects().subscribe(new Observer<List<Project>>() {
             @Override
-            public void onSuccess(List<Project> projects) {
-                super.onSuccess(projects);
-                afterLoadProjectList(projects);
+            public void onCompleted() {
+
             }
 
             @Override
-            public void onFail(Exception e) {
-                super.onFail(e);
+            public void onError(Throwable e) {
                 showError();
+            }
+
+            @Override
+            public void onNext(List<Project> projects) {
+                afterLoadProjectList(projects);
             }
         });
     }
@@ -164,60 +175,48 @@ public class RedMineActivity extends ActionBarActivity {
     private void afterLoadProjectList(final List<Project> projects) {
         project = findProject(projects, PreferencesController.getPreferencesController(this).getCurrentProject());
 
-        redMineControllerWrapper.getListOfIssues(project, new RedMineControllerWrapper.GetIssuesListener() {
+        Observable<List<Issue>> getListOfIssues = redMineControllerWrapper.getListOfIssues(project);
+        Observable<List<Membership>> getMemberShips = redMineControllerWrapper.getMemberships(project);
+        Observable<List<IssueStatus>> getStatuses = redMineControllerWrapper.getStatuses();
+
+        Subscription subscribe = Observable.zip(getListOfIssues, getStatuses, getMemberShips, new Func3<List<Issue>, List<IssueStatus>, List<Membership>, List[]>() {
             @Override
-            public void onSuccess(List<Issue> issue) {
-                super.onSuccess(issue);
-                IssueAdapter issueArrayAdapter = new IssueAdapter(RedMineActivity.this);
-                issueArrayAdapter.addAll(issue);
-                issues.setAdapter(issueArrayAdapter);
+            public List[] call(List<Issue> issues, List<IssueStatus> issueStatuses, List<Membership> memberships) {
+                return new List[]{issues, issueStatuses, memberships};
             }
-
+        }).subscribe(new Subscriber<List[]>() {
             @Override
-            public void onFail(Exception e) {
-                super.onFail(e);
-                showError();
-            }
-        });
-
-        redMineControllerWrapper.getMemberships(project, new RedMineControllerWrapper.GetMembershipsListener() {
-
-            @Override
-            public void onSuccess(List<Membership> memberships) {
-                super.onSuccess(memberships);
-                AssigneeAdapter memberShipAdapter = new AssigneeAdapter(RedMineActivity.this);
-                memberShipAdapter.addAll(memberships);
-                assignee.setAdapter(memberShipAdapter);
-            }
-
-            @Override
-            public void onFail(Exception e) {
-                super.onFail(e);
-                showError();
-            }
-        });
-
-        redMineControllerWrapper.getStatuses(new RedMineControllerWrapper.GetStatusesListener() {
-
-            @Override
-            public void onSuccess(List<IssueStatus> issueStatuses) {
-                super.onSuccess(issueStatuses);
-                StatusAdapter statusArrayAdapter = new StatusAdapter(RedMineActivity.this);
-                statusArrayAdapter.addAll(issueStatuses);
-                status.setAdapter(statusArrayAdapter);
+            public void onCompleted() {
                 progressDialog.dismiss();
             }
 
             @Override
-            public void onFail(Exception e) {
-                super.onFail(e);
+            public void onError(Throwable e) {
                 showError();
             }
+
+            @Override
+            public void onNext(List[] o) {
+                logger.debug("combineLatest");
+
+                //Issues
+                IssueAdapter issueArrayAdapter = new IssueAdapter(RedMineActivity.this);
+                issueArrayAdapter.addAll(o[0]);
+                issuesView.setAdapter(issueArrayAdapter);
+
+                //IssueStatuses
+                StatusAdapter statusArrayAdapter = new StatusAdapter(RedMineActivity.this);
+                statusArrayAdapter.addAll(o[1]);
+                status.setAdapter(statusArrayAdapter);
+
+                //MemberShips
+                AssigneeAdapter memberShipAdapter = new AssigneeAdapter(RedMineActivity.this);
+                memberShipAdapter.addAll(o[2]);
+                assignee.setAdapter(memberShipAdapter);
+            }
         });
-    }
 
-    private void checkIfLoaded() {
-
+        manageSubscription(subscribe);
     }
 
     private void showError() {
@@ -302,7 +301,7 @@ public class RedMineActivity extends ActionBarActivity {
                 }
 
                 @Override
-                public void onError(Exception e) {
+                public void onError(Throwable e) {
                 }
             });
             return true;
@@ -313,56 +312,75 @@ public class RedMineActivity extends ActionBarActivity {
 
     private void share() {
         if (newTicket.isChecked()) {
-            redMineControllerWrapper.postNewIssue(project,
+            Subscription subscribe = redMineControllerWrapper.postNewIssue(project,
                     ((Membership) assignee.getSelectedItem()).getUser(),
                     ((IssueStatus) status.getSelectedItem()).getName(),
                     reportData.getTitle(),
                     reportData.getMessage(),
                     reportData.isIncludeScreenShot() ? reportData.getScreenShotPath() : null,
-                    reportData.isIncludeLogs() ? reportData.getLogPath() : null,
-                    new RedMineControllerWrapper.EditIssueListener() {
-                        @Override
-                        public void onSuccess(Issue issue) {
-                            super.onSuccess(issue);
-                            Toast.makeText(RedMineActivity.this, getString(R.string.redmine_success), 1000).show();
-                        }
+                    reportData.isIncludeLogs() ? reportData.getLogPath() : null
+            ).subscribe(new Subscriber<Issue>() {
+                @Override
+                public void onCompleted() {
+                    Toast.makeText(RedMineActivity.this, getString(R.string.redmine_success), 1000).show();
+                }
 
-                        @Override
-                        public void onFail(Exception e) {
-                            super.onFail(e);
-                            logger.trace("share fail", e);
-                            Toast.makeText(RedMineActivity.this, getString(R.string.redmine_fail), 1000).show();
-                        }
-                    }
-            );
+                @Override
+                public void onError(Throwable e) {
+                    Toast.makeText(RedMineActivity.this, getString(R.string.redmine_fail), 1000).show();
+                }
+
+                @Override
+                public void onNext(Issue issue) {
+
+                }
+            });
+
+            manageSubscription(subscribe);
         } else if (selectedIssue != null) {
-            redMineControllerWrapper.postCommentToTicket(selectedIssue,
+            Subscription subscribe = redMineControllerWrapper.postCommentToTicket(selectedIssue,
                     ((Membership) assignee.getSelectedItem()).getUser(),
                     ((IssueStatus) status.getSelectedItem()).getName(),
                     reportData.getTitle(),
                     reportData.getMessage(),
                     reportData.isIncludeScreenShot() ? reportData.getScreenShotPath() : null,
-                    reportData.isIncludeLogs() ? reportData.getLogPath() : null,
-                    new RedMineControllerWrapper.EditIssueListener() {
-                        @Override
-                        public void onSuccess(Issue issue) {
-                            super.onSuccess(issue);
-                            Toast.makeText(RedMineActivity.this, getString(R.string.redmine_success), 1000).show();
-                        }
+                    reportData.isIncludeLogs() ? reportData.getLogPath() : null).subscribe(new Subscriber<Issue>() {
+                @Override
+                public void onCompleted() {
+                    Toast.makeText(RedMineActivity.this, getString(R.string.redmine_success), 1000).show();
+                }
 
-                        @Override
-                        public void onFail(Exception e) {
-                            super.onFail(e);
-                            Toast.makeText(RedMineActivity.this, getString(R.string.redmine_fail), 1000).show();
-                        }
-                    }
-            );
+                @Override
+                public void onError(Throwable e) {
+                    Toast.makeText(RedMineActivity.this, getString(R.string.redmine_fail), 1000).show();
+                }
+
+                @Override
+                public void onNext(Issue issue) {
+
+                }
+            });
+
+            manageSubscription(subscribe);
         } else {
             Toast.makeText(RedMineActivity.this, getString(R.string.redmine_select_ticket), 1000).show();
         }
     }
 
+    private void manageSubscription(final Subscription subscribe) {
+        subscriptions.add(subscribe);
+    }
 
+    @Override
+    protected void onDestroy() {
+        super.onDestroy();
+        Iterator<Subscription> iterator = subscriptions.iterator();
+        while (iterator.hasNext()) {
+            Subscription next = iterator.next();
+            next.unsubscribe();
+            iterator.remove();
+        }
+    }
 }
 
 

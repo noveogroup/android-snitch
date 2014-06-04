@@ -10,6 +10,8 @@ import com.taskadapter.redmineapi.bean.Project;
 
 import java.util.List;
 
+import rx.Subscriber;
+
 /**
  * Created by oisupov on 5/13/2014.
  */
@@ -24,7 +26,7 @@ public final class OptionsManager {
 
         public void onCancel();
 
-        public void onError(Exception e);
+        public void onError(Throwable e);
     }
 
     public static void setupOptions(final Activity activity, final OptionsSetupListener optionsSetupListener) {
@@ -45,10 +47,22 @@ public final class OptionsManager {
         RedMineControllerWrapper redMineControllerWrapper = new RedMineControllerWrapper(login, password, server);
 
         final ProgressDialog progressDialog = DialogUtils.showProgressDialog(activity);
-        redMineControllerWrapper.getListOfProjects(new RedMineControllerWrapper.GetProjectsListener() {
+
+        redMineControllerWrapper.getListOfProjects().subscribe(new Subscriber<List<Project>>() {
+            @Override
+            public void onCompleted() {
+
+            }
 
             @Override
-            public void onSuccess(List<Project> projects) {
+            public void onError(Throwable e) {
+                progressDialog.dismiss();
+                Toast.makeText(activity, e.getMessage(), 3000).show();
+                optionsSetupListener.onError(e);
+            }
+
+            @Override
+            public void onNext(List<Project> projects) {
                 progressDialog.dismiss();
                 String currentProject = PreferencesController.getPreferencesController(activity).getCurrentProject();
                 DialogUtils.showSelectProjectDialog(activity, projects, currentProject, new DialogUtils.ProjectSelectListener() {
@@ -66,13 +80,6 @@ public final class OptionsManager {
                         optionsSetupListener.onCancel();
                     }
                 });
-            }
-
-            @Override
-            public void onFail(Exception e) {
-                progressDialog.dismiss();
-                Toast.makeText(activity, e.getMessage(), 3000).show();
-                optionsSetupListener.onError(e);
             }
         });
     }

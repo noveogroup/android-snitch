@@ -1,7 +1,7 @@
 package com.taskadapter.redmineapi.internal.comm;
 
 import org.apache.http.HttpRequest;
-import com.taskadapter.redmineapi.RedmineException;
+import com.taskadapter.redmineapi.RedMineException;
 
 /**
  * Simple communicator interface.
@@ -15,6 +15,6 @@ public interface SimpleCommunicator<T> {
 	 * 
 	 * @return the response body.
 	 */
-	public abstract T sendRequest(HttpRequest request) throws RedmineException;
+	public abstract T sendRequest(HttpRequest request) throws RedMineException;
 
 }

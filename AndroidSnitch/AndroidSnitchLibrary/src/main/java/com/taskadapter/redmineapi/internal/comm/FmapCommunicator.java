@@ -1,7 +1,7 @@
 package com.taskadapter.redmineapi.internal.comm;
 
 import org.apache.http.HttpRequest;
-import com.taskadapter.redmineapi.RedmineException;
+import com.taskadapter.redmineapi.RedMineException;
 
 /**
  * FMap communicator.
@@ -22,7 +22,7 @@ final class FmapCommunicator<K, I> implements Communicator<K> {
 
 	@Override
 	public <R> R sendRequest(HttpRequest request,
-			ContentHandler<K, R> contentHandler) throws RedmineException {
+			ContentHandler<K, R> contentHandler) throws RedMineException {
 		return peer.sendRequest(request,
 				Communicators.compose(contentHandler, handler));
 	}
