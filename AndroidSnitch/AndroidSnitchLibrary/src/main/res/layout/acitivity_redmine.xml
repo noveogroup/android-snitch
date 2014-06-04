@@ -34,9 +34,8 @@
         <ListView
             android:id="@+id/issues"
             android:layout_width="match_parent"
-            android:layout_height="0dp"
+            android:layout_height="match_parent"
             android:layout_margin="10dp"
-            android:layout_weight="1"
             android:background="@android:color/white"
             android:choiceMode="singleChoice" />
 
@@ -66,6 +65,7 @@
     </LinearLayout>
 
     <LinearLayout
+        android:id="@+id/assignee_container"
         android:layout_width="match_parent"
         android:layout_height="wrap_content">
 
@@ -75,7 +75,7 @@
             android:layout_gravity="center"
             android:layout_weight="1"
             android:paddingLeft="20dp"
-            android:text="@string/assignee"
+            android:text="@string/assignee_label"
             android:textSize="20dp" />
 
         <Spinner
@@ -92,12 +92,13 @@
         android:layout_height="wrap_content">
 
         <TextView
+            android:id="@+id/status_container"
             android:layout_width="0dp"
             android:layout_height="wrap_content"
             android:layout_gravity="center"
             android:layout_weight="1"
             android:paddingLeft="20dp"
-            android:text="Status"
+            android:text="@string/status_label"
             android:textSize="20dp" />
 
         <Spinner

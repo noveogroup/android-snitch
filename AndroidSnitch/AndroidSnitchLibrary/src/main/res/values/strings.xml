@@ -21,7 +21,7 @@
     <string name="save">Save</string>
     <string name="cancel">Cancel</string>
     <string name="credentials">Credentials</string>
-    <string name="assignee">Assignee</string>
+    <string name="assignee_label">Assignee</string>
     <string name="new_ticket">New ticket</string>
     <string name="menu_title_manage">Manage</string>
     <string name="select">Выбрать</string>
@@ -33,6 +33,10 @@
     <string name="redmine_fail">Fail</string>
     <string name="redmine_success">Success</string>
     <string name="redmine_select_ticket">Select ticket</string>
+    <string name="status_label">Status</string>
+    <string name="compose">Compose</string>
+    <string name="prepare">Prepare</string>
+    <string name="report_crash">Report crash</string>
 
     <string-array name="share_options">
         <item>send by mail</item>

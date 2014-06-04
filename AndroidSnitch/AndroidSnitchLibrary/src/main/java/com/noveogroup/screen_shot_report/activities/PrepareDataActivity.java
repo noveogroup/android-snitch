@@ -41,6 +41,8 @@ public class PrepareDataActivity extends ActionBarActivity implements ActionBar.
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
 
+        getSupportActionBar().setTitle(getString(R.string.prepare));
+
         setContentView(R.layout.fragment_content_activity);
 
         final ActionBar supportActionBar = getSupportActionBar();

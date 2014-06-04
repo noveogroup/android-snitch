@@ -6,6 +6,7 @@ import android.support.v7.app.ActionBarActivity;
 import android.text.Editable;
 import android.text.TextUtils;
 import android.text.TextWatcher;
+import android.util.Log;
 import android.view.Menu;
 import android.view.MenuItem;
 import android.view.View;
@@ -57,8 +58,8 @@ public class RedMineActivity extends ActionBarActivity {
     private EditText issue;
     private ListView issuesView;
 
-    private Spinner status;
-    private Spinner assignee;
+    private Spinner statusView;
+    private Spinner assigneeView;
 
     private volatile RedMineControllerWrapper redMineControllerWrapper;
 
@@ -125,11 +126,8 @@ public class RedMineActivity extends ActionBarActivity {
             }
         });
 
-        status = (Spinner) findViewById(R.id.status);
-        assignee = (Spinner) findViewById(R.id.assignee);
-
-        assignee.setAdapter(new AssigneeAdapter(getApplicationContext()));
-        status.setAdapter(new StatusAdapter(getApplicationContext()));
+        statusView = (Spinner) findViewById(R.id.status);
+        assigneeView = (Spinner) findViewById(R.id.assignee);
 
         issue.addTextChangedListener(new TextWatcher() {
             @Override
@@ -162,7 +160,9 @@ public class RedMineActivity extends ActionBarActivity {
 
             @Override
             public void onError(Throwable e) {
-                showError();
+                Toast.makeText(RedMineActivity.this, "Error occured " + e.getMessage(), 4000).show();
+                progressDialog.dismiss();
+                setupManager();
             }
 
             @Override
@@ -170,10 +170,14 @@ public class RedMineActivity extends ActionBarActivity {
                 afterLoadProjectList(projects);
             }
         });
+
+        manageSubscription(subscribe);
     }
 
     private void afterLoadProjectList(final List<Project> projects) {
         project = findProject(projects, PreferencesController.getPreferencesController(this).getCurrentProject());
+
+        getSupportActionBar().setTitle(project.getName());
 
         Observable<List<Issue>> getListOfIssues = redMineControllerWrapper.getListOfIssues(project);
         Observable<List<Membership>> getMemberShips = redMineControllerWrapper.getMemberships(project);
@@ -192,7 +196,10 @@ public class RedMineActivity extends ActionBarActivity {
 
             @Override
             public void onError(Throwable e) {
-                showError();
+                Log.e(RedMineActivity.class.getName(), Log.getStackTraceString(e));
+                Toast.makeText(RedMineActivity.this, "Error occured " + e.getMessage(), 4000).show();
+                progressDialog.dismiss();
+                setupManager();
             }
 
             @Override
@@ -200,29 +207,41 @@ public class RedMineActivity extends ActionBarActivity {
                 logger.debug("combineLatest");
 
                 //Issues
-                IssueAdapter issueArrayAdapter = new IssueAdapter(RedMineActivity.this);
-                issueArrayAdapter.addAll(o[0]);
+                IssueAdapter issueArrayAdapter = new IssueAdapter(RedMineActivity.this, o[0]);
                 issuesView.setAdapter(issueArrayAdapter);
 
                 //IssueStatuses
-                StatusAdapter statusArrayAdapter = new StatusAdapter(RedMineActivity.this);
-                statusArrayAdapter.addAll(o[1]);
-                status.setAdapter(statusArrayAdapter);
+                if (o[1].isEmpty()) {
+                    statusView.setAdapter(new StatusAdapter(RedMineActivity.this));
+                    statusView.setVisibility(View.GONE);
+                    findViewById(R.id.status_container).setVisibility(View.GONE);
+                } else {
+                    StatusAdapter statusArrayAdapter = new StatusAdapter(RedMineActivity.this, o[1]);
+                    statusView.setAdapter(statusArrayAdapter);
+                    findViewById(R.id.status_container).setVisibility(View.VISIBLE);
+                }
 
                 //MemberShips
-                AssigneeAdapter memberShipAdapter = new AssigneeAdapter(RedMineActivity.this);
-                memberShipAdapter.addAll(o[2]);
-                assignee.setAdapter(memberShipAdapter);
+                if (o[2].isEmpty()) {
+                    assigneeView.setAdapter(new AssigneeAdapter(RedMineActivity.this));
+                    findViewById(R.id.assignee_container).setVisibility(View.GONE);
+                } else {
+                    AssigneeAdapter memberShipAdapter = new AssigneeAdapter(RedMineActivity.this, o[2]);
+                    assigneeView.setAdapter(memberShipAdapter);
+                    findViewById(R.id.assignee_container).setVisibility(View.VISIBLE);
+                }
             }
         });
 
         manageSubscription(subscribe);
     }
 
-    private void showError() {
+    private void showError(Throwable e) {
         if (progressDialog != null) {
             progressDialog.dismiss();
         }
+
+        Toast.makeText(this, "Something went wrong", 3000).show();
     }
 
     private void onSelectIssue(final Issue selectedIssue) {
@@ -230,19 +249,19 @@ public class RedMineActivity extends ActionBarActivity {
         final User issueAssignee = selectedIssue.getAssignee();
         final int statusId = selectedIssue.getStatusId();
 
-        SpinnerAdapter assigneeAdapter = assignee.getAdapter();
+        SpinnerAdapter assigneeAdapter = assigneeView.getAdapter();
         for (int i = 0; i < assigneeAdapter.getCount(); i++) {
             Membership item = (Membership) assigneeAdapter.getItem(i);
             if (item.getUser().getId().equals(issueAssignee.getId())) {
-                assignee.setSelection(i);
+                assigneeView.setSelection(i);
             }
         }
 
-        SpinnerAdapter statusAdapter = status.getAdapter();
+        SpinnerAdapter statusAdapter = statusView.getAdapter();
         for (int i = 0; i < statusAdapter.getCount(); i++) {
             IssueStatus item = (IssueStatus) statusAdapter.getItem(i);
             if (item.getId().equals(statusId)) {
-                status.setSelection(i);
+                statusView.setSelection(i);
             }
         }
 
@@ -313,8 +332,8 @@ public class RedMineActivity extends ActionBarActivity {
     private void share() {
         if (newTicket.isChecked()) {
             Subscription subscribe = redMineControllerWrapper.postNewIssue(project,
-                    ((Membership) assignee.getSelectedItem()).getUser(),
-                    ((IssueStatus) status.getSelectedItem()).getName(),
+                    assigneeView.getSelectedItem() == null ? null : ((Membership) assigneeView.getSelectedItem()).getUser(),
+                    statusView.getSelectedItem() == null ? null : ((IssueStatus) statusView.getSelectedItem()).getName(),
                     reportData.getTitle(),
                     reportData.getMessage(),
                     reportData.isIncludeScreenShot() ? reportData.getScreenShotPath() : null,
@@ -339,8 +358,8 @@ public class RedMineActivity extends ActionBarActivity {
             manageSubscription(subscribe);
         } else if (selectedIssue != null) {
             Subscription subscribe = redMineControllerWrapper.postCommentToTicket(selectedIssue,
-                    ((Membership) assignee.getSelectedItem()).getUser(),
-                    ((IssueStatus) status.getSelectedItem()).getName(),
+                    assigneeView.getSelectedItem() == null ? null : ((Membership) assigneeView.getSelectedItem()).getUser(),
+                    statusView.getSelectedItem() == null ? null : ((IssueStatus) statusView.getSelectedItem()).getName(),
                     reportData.getTitle(),
                     reportData.getMessage(),
                     reportData.isIncludeScreenShot() ? reportData.getScreenShotPath() : null,

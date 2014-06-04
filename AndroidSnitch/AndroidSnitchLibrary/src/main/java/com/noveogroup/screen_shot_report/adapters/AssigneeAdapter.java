@@ -7,19 +7,22 @@ import android.widget.ArrayAdapter;
 import android.widget.TextView;
 
 import com.noveogroup.screen_shot_report.R;
+import com.noveogroup.screen_shot_report.activities.RedMineActivity;
 import com.taskadapter.redmineapi.bean.Membership;
 
-import org.w3c.dom.Text;
-
-import java.util.ArrayList;
+import java.util.List;
 
 /**
  * Created by oisupov on 4/11/14.
  */
 public class AssigneeAdapter extends ArrayAdapter<Membership> {
 
-    public AssigneeAdapter(Context context) {
-        super(context, R.layout.item_redmine_spinner);
+    public AssigneeAdapter(Context context, List<Membership> membershipList) {
+        super(context, R.layout.item_redmine_spinner, membershipList);
+    }
+
+    public AssigneeAdapter(RedMineActivity redMineActivity) {
+        super(redMineActivity, R.layout.item_redmine_spinner);
     }
 
     @Override
@@ -28,9 +31,9 @@ public class AssigneeAdapter extends ArrayAdapter<Membership> {
             convertView = View.inflate(parent.getContext(), R.layout.spinner_item_project, null);
         }
 
-        ((TextView)convertView).setText(getItem(position).getUser().getFullName());
+        ((TextView) convertView).setText(getItem(position).getUser().getFullName());
 
-        return  convertView;
+        return convertView;
     }
 
     @Override

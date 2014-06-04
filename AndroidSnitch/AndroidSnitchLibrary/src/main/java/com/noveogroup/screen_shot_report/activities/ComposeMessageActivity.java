@@ -79,6 +79,8 @@ public class ComposeMessageActivity extends ActionBarActivity {
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
 
+        getSupportActionBar().setTitle(getString(R.string.compose));
+
         recognizerDialog = new AlertDialog.Builder(this).setTitle(R.string.speech_recognizer_dialog_speak_label).create();
 
         getSupportActionBar().setDisplayHomeAsUpEnabled(true);

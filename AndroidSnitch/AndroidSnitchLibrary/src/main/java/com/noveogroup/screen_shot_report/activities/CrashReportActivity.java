@@ -30,6 +30,8 @@ public class CrashReportActivity extends ActionBarActivity {
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
 
+        getSupportActionBar().setTitle(getString(R.string.report_crash));
+
         logger.debug("Crash report activity started");
 
         setContentView(R.layout.activity_crash_report);

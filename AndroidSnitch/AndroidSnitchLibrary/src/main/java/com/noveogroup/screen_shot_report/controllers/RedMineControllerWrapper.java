@@ -1,5 +1,6 @@
 package com.noveogroup.screen_shot_report.controllers;
 
+import com.taskadapter.redmineapi.NotAuthorizedException;
 import com.taskadapter.redmineapi.RedMineException;
 import com.taskadapter.redmineapi.RedmineManager;
 import com.taskadapter.redmineapi.bean.Attachment;
@@ -14,6 +15,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import java.io.File;
+import java.util.ArrayList;
 import java.util.List;
 
 import rx.Observable;
@@ -128,7 +130,13 @@ public class RedMineControllerWrapper {
                     subscriber.onCompleted();
                 } catch (RedMineException e) {
                     logger.trace(e.getMessage(), e);
-                    subscriber.onError(e);
+                    if (e instanceof NotAuthorizedException) {
+                        // Because sometimes user does not has permissions to get memberships o0
+                        subscriber.onNext(new ArrayList<Membership>());
+                        subscriber.onCompleted();
+                    } else {
+                        subscriber.onError(e);
+                    }
                 }
             }
         });
@@ -143,7 +151,13 @@ public class RedMineControllerWrapper {
                     subscriber.onCompleted();
                 } catch (RedMineException e) {
                     logger.trace(e.getMessage(), e);
-                    subscriber.onError(e);
+                    if (e instanceof NotAuthorizedException) {
+                        // Because sometimes user does not has permissions to get statuses o0
+                        subscriber.onNext(new ArrayList<IssueStatus>());
+                        subscriber.onCompleted();
+                    } else {
+                        subscriber.onError(e);
+                    }
                 }
             }
         });

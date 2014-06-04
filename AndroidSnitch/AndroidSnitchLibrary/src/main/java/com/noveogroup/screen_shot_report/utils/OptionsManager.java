@@ -73,6 +73,7 @@ public final class OptionsManager {
                         preferencesController.setLogin(login);
                         preferencesController.setServer(server);
                         preferencesController.setPassword(password);
+                        optionsSetupListener.onOptionsSatUp();
                     }
 
                     @Override

@@ -10,14 +10,15 @@ import com.noveogroup.screen_shot_report.R;
 import com.taskadapter.redmineapi.bean.Issue;
 
 import java.util.ArrayList;
+import java.util.List;
 
 /**
  * Created by oisupov on 4/11/14.
  */
 public class IssueAdapter extends ArrayAdapter<Issue> {
 
-    public IssueAdapter(Context context) {
-        super(context, R.layout.item_redmine_issue);
+    public IssueAdapter(Context context, List<Issue> issueList) {
+        super(context, R.layout.item_redmine_issue, issueList);
     }
 
     @Override
