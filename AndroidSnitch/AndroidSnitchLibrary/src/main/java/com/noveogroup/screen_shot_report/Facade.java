@@ -65,11 +65,12 @@ public class Facade {
         }
     }
 
-    private static String getLogs(final Context context) {
+    private static String getLogs() {
+        String separator = System.getProperty("line.separator");
         try {
             int counter = 0;
             final Process logcat = Runtime.getRuntime().exec(new String[]
-                    {"logcat", "-d"});//, String.format("AndroidRuntime:E %s:V *:S",  con) });
+                    {"logcat", "-d"});
 
             final BufferedReader reader = new BufferedReader(new InputStreamReader
                     (logcat.getInputStream()));
@@ -78,7 +79,7 @@ public class Facade {
             String line;
 
             while ((line = reader.readLine()) != null && counter++ < 100) {
-                log.append(line).append('\n');
+                log.append(line).append(separator);
             }
             return log.toString();
         } catch (IOException e) {
@@ -107,7 +108,7 @@ public class Facade {
 
     public static void shoot(final Activity activity) {
         final Bitmap bitmap = takeScreenShot(activity);
-        final String logs = getLogs(activity.getApplicationContext());
+        final String logs = getLogs();
 
         try {
             final File screenShotFile = IOUtils.writeBitmap(activity, bitmap, IOUtils.DEFAULT_SCREEN_SHOT_PATH);

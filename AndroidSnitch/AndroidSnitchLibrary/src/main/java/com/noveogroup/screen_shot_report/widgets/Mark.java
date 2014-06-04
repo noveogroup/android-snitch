@@ -41,7 +41,7 @@ public class Mark implements Parcelable {
         @Override
         public Mark createFromParcel(Parcel source) {
             final Mark mark = new Mark();
-            mark.points = source.readArrayList(ClassLoader.getSystemClassLoader());
+            mark.points = source.readArrayList(Point.class.getClassLoader());
             mark.restorePathFromPoints();
             return mark;
         }

@@ -44,6 +44,7 @@ public class ScreenShotFragment extends Fragment {
         markView.setImageBitmap(bitmap);
 
         if (savedInstanceState != null) {
+            savedInstanceState.setClassLoader(getActivity().getClassLoader());
             markView.setMarks(savedInstanceState.<Mark>getParcelableArrayList(KEY_MARKS));
         }
 
@@ -108,9 +109,11 @@ public class ScreenShotFragment extends Fragment {
         }
     }
 
+
     @Override
     public void onSaveInstanceState(Bundle outState) {
         super.onSaveInstanceState(outState);
+        outState.setClassLoader(getActivity().getClassLoader());
         outState.putParcelableArrayList(KEY_MARKS, markView.getMarks());
     }
 

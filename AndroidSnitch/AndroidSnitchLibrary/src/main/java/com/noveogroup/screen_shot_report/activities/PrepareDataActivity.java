@@ -66,6 +66,7 @@ public class PrepareDataActivity extends ActionBarActivity implements ActionBar.
                 .commit();
 
         if (savedInstanceState != null) {
+            savedInstanceState.setClassLoader(getClassLoader());
             screenShotFragment.setInitialSavedState((Fragment.SavedState) savedInstanceState.getParcelable(SAVED_STATE_SCREEN_SHOT_FRAGMENT));
             logEditFragment.setInitialSavedState((Fragment.SavedState) savedInstanceState.getParcelable(SAVED_STATE_LOG_EDIT_FRAGMENT));
         }
@@ -84,10 +85,10 @@ public class PrepareDataActivity extends ActionBarActivity implements ActionBar.
     @Override
     protected void onSaveInstanceState(Bundle outState) {
         super.onSaveInstanceState(outState);
-
         final Fragment.SavedState screenShotFragmentState = getSupportFragmentManager().saveFragmentInstanceState(screenShotFragment);
         final Fragment.SavedState logEditFragmentState = getSupportFragmentManager().saveFragmentInstanceState(logEditFragment);
 
+        outState.setClassLoader(getClassLoader());
         outState.putParcelable(SAVED_STATE_SCREEN_SHOT_FRAGMENT, screenShotFragmentState);
         outState.putParcelable(SAVED_STATE_LOG_EDIT_FRAGMENT, logEditFragmentState);
     }
