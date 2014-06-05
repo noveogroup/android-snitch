@@ -10,6 +10,7 @@ import android.speech.SpeechRecognizer;
 import android.support.v4.content.FileProvider;
 import android.support.v4.view.MenuItemCompat;
 import android.support.v7.app.ActionBarActivity;
+import android.text.TextUtils;
 import android.view.Menu;
 import android.view.MenuItem;
 import android.view.View;
@@ -19,24 +20,28 @@ import android.widget.EditText;
 import android.widget.Spinner;
 import android.widget.Toast;
 
-import com.noveogroup.screen_shot_report.controllers.PreferencesController;
 import com.noveogroup.screen_shot_report.R;
 import com.noveogroup.screen_shot_report.ReportData;
+import com.noveogroup.screen_shot_report.controllers.PreferencesController;
 import com.noveogroup.screen_shot_report.listeners.DefaultRecognitionListener;
 import com.noveogroup.screen_shot_report.utils.IOUtils;
 
-
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.w3c.dom.Text;
 
 import java.io.File;
+import java.text.SimpleDateFormat;
 import java.util.ArrayList;
+import java.util.Date;
+import java.util.Locale;
 
 /**
  * Created by oisupov on 4/4/14.
  */
 public class ComposeMessageActivity extends ActionBarActivity {
 
+    public static final SimpleDateFormat DATE_FORMAT = new SimpleDateFormat("dd/MM/yyyy hh:mm", Locale.ENGLISH);
     private Logger logger = LoggerFactory.getLogger(ComposeMessageActivity.class);
     private Dialog recognizerDialog;
     private Menu menu;
@@ -162,9 +167,21 @@ public class ComposeMessageActivity extends ActionBarActivity {
         }
     }
 
-    private void prepare() {
-        ReportData.getInstance().setTitle(((EditText) findViewById(R.id.title)).getText().toString());
-        ReportData.getInstance().setMessage(((EditText) findViewById(R.id.message)).getText().toString());
+    private boolean prepare() {
+        String title = ((EditText) findViewById(R.id.title)).getText().toString();
+        if (TextUtils.isEmpty(title)) {
+            ReportData.getInstance().setTitle("Ticket " + DATE_FORMAT.format(new Date()));
+        } else {
+            ReportData.getInstance().setTitle(title);
+        }
+
+        String message = ((EditText) findViewById(R.id.message)).getText().toString();
+        if (TextUtils.isEmpty(message)) {
+            ReportData.getInstance().setMessage("");
+        } else {
+            ReportData.getInstance().setMessage(message);
+        }
+
         boolean attachLogs = ((CheckBox) findViewById(R.id.attach_logs)).isChecked();
         ReportData.getInstance().setIncludeLogs(attachLogs);
         boolean attachScreenShot = ((CheckBox) findViewById(R.id.attach_screen_shot)).isChecked();
@@ -172,6 +189,7 @@ public class ComposeMessageActivity extends ActionBarActivity {
 
         PreferencesController.getPreferencesController(this).setAttachLogs(attachLogs);
         PreferencesController.getPreferencesController(this).setAttachScreenShot(attachScreenShot);
+        return true;
     }
 
     private void shareEmail() {

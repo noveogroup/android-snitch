@@ -3,14 +3,18 @@
 <LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
-    android:orientation="vertical">
+    android:orientation="vertical"
+    android:padding="10dp">
+
+    <TextView
+        android:id="@+id/user"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content" />
 
     <CheckBox
         android:id="@+id/new_ticket"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:layout_marginLeft="10dp"
-        android:layout_marginTop="10dp"
         android:checked="true"
         android:text="@string/new_ticket" />
 
@@ -74,7 +78,6 @@
             android:layout_height="wrap_content"
             android:layout_gravity="center"
             android:layout_weight="1"
-            android:paddingLeft="20dp"
             android:text="@string/assignee_label"
             android:textSize="20dp" />
 
@@ -97,7 +100,6 @@
             android:layout_height="wrap_content"
             android:layout_gravity="center"
             android:layout_weight="1"
-            android:paddingLeft="20dp"
             android:text="@string/status_label"
             android:textSize="20dp" />
 

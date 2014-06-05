@@ -15,6 +15,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import java.io.File;
+import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -103,15 +104,36 @@ public class RedMineControllerWrapper {
             @Override
             public void call(Subscriber<? super Issue> subscriber) {
                 try {
-                    if (pictureFilename != null) {
-                        Attachment attachment = redmineManager.uploadAttachment("image/jpeg", new File(pictureFilename));
-                        issue.getAttachments().add(attachment);
-                    }
-                    if (logsFilename != null) {
-                        Attachment attachment = redmineManager.uploadAttachment("text", new File(logsFilename));
-                        issue.getAttachments().add(attachment);
-                    }
+                    uploadAttachments(pictureFilename, issue, logsFilename);
+
                     subscriber.onNext(redmineManager.createIssue(String.valueOf(project.getId()), issue));
+                    subscriber.onCompleted();
+                } catch (Exception e) {
+                    logger.trace(e.getMessage(), e);
+                    subscriber.onError(e);
+                }
+            }
+        });
+    }
+
+    private void uploadAttachments(String pictureFilename, Issue issue, String logsFilename) throws RedMineException, IOException {
+        if (pictureFilename != null) {
+            Attachment attachment = redmineManager.uploadAttachment("image/jpeg", new File(pictureFilename));
+            issue.getAttachments().add(attachment);
+        }
+        if (logsFilename != null) {
+            Attachment attachment = redmineManager.uploadAttachment("text", new File(logsFilename));
+            issue.getAttachments().add(attachment);
+        }
+    }
+
+    private Observable<Void> updateIssue(final Issue issue, final String pictureFilename, final String logsFilename) {
+        return updateObservable(new Observable.OnSubscribe<Void>() {
+            @Override
+            public void call(Subscriber<? super Void> subscriber) {
+                try {
+                    uploadAttachments(pictureFilename, issue, logsFilename);
+                    redmineManager.update(issue);
                     subscriber.onCompleted();
                 } catch (Exception e) {
                     logger.trace(e.getMessage(), e);
@@ -163,14 +185,10 @@ public class RedMineControllerWrapper {
         });
     }
 
-    public Observable<Issue> postCommentToTicket(final Issue issue, final User assignee, final String statusName,
+    public Observable<Void> postCommentToTicket(final Issue issue, final User assignee, final String statusName,
                                                  final String title, final String message,
                                                  final String pictureFilename, final String logsFilename) {
-        List<Changeset> changesetList = issue.getChangesets();
-        Changeset changeset = new Changeset();
-        changeset.setComments(title + "\n" + message);
-        changesetList.add(changeset);
-        issue.setChangesets(changesetList);
+        issue.setNotes(title + "\n" + message);
 
         if (assignee != null) {
             issue.setAssignee(assignee);
@@ -180,7 +198,7 @@ public class RedMineControllerWrapper {
             issue.setStatusName(statusName);
         }
 
-        return createIssue(issue.getProject(), issue, pictureFilename, logsFilename);
+        return updateIssue(issue, pictureFilename, logsFilename);
     }
 
     private <T> Observable<T> updateObservable(Observable.OnSubscribe<T> onSubscribe) {

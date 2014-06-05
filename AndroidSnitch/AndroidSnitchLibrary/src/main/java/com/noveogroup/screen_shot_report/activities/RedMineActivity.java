@@ -147,8 +147,8 @@ public class RedMineActivity extends ActionBarActivity {
         setupManager();
         loadProject();
 
-        ((TextView) findViewById(R.id.title)).setText(reportData.getTitle());
-        ((TextView) findViewById(R.id.message)).setText(reportData.getMessage());
+        ((TextView) findViewById(R.id.title)).setText("Title: " + reportData.getTitle());
+        ((TextView) findViewById(R.id.message)).setText("Message: " + reportData.getMessage());
     }
 
     private void loadProject() {
@@ -178,6 +178,7 @@ public class RedMineActivity extends ActionBarActivity {
         project = findProject(projects, PreferencesController.getPreferencesController(this).getCurrentProject());
 
         getSupportActionBar().setTitle(project.getName());
+        ((TextView)findViewById(R.id.user)).setText("User: " + PreferencesController.getPreferencesController(getApplicationContext()).getLogin());
 
         Observable<List<Issue>> getListOfIssues = redMineControllerWrapper.getListOfIssues(project);
         Observable<List<Membership>> getMemberShips = redMineControllerWrapper.getMemberships(project);
@@ -241,7 +242,7 @@ public class RedMineActivity extends ActionBarActivity {
             progressDialog.dismiss();
         }
 
-        Toast.makeText(this, "Something went wrong", 3000).show();
+        Toast.makeText(this, getString(R.string.error_toast_message), 3000).show();
     }
 
     private void onSelectIssue(final Issue selectedIssue) {
@@ -363,7 +364,7 @@ public class RedMineActivity extends ActionBarActivity {
                     reportData.getTitle(),
                     reportData.getMessage(),
                     reportData.isIncludeScreenShot() ? reportData.getScreenShotPath() : null,
-                    reportData.isIncludeLogs() ? reportData.getLogPath() : null).subscribe(new Subscriber<Issue>() {
+                    reportData.isIncludeLogs() ? reportData.getLogPath() : null).subscribe(new Subscriber<Void>() {
                 @Override
                 public void onCompleted() {
                     Toast.makeText(RedMineActivity.this, getString(R.string.redmine_success), 1000).show();
@@ -375,7 +376,7 @@ public class RedMineActivity extends ActionBarActivity {
                 }
 
                 @Override
-                public void onNext(Issue issue) {
+                public void onNext(Void issue) {
 
                 }
             });
