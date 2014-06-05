@@ -30,9 +30,6 @@ public class PrepareDataActivity extends ActionBarActivity implements ActionBar.
 
     private Logger logger = LoggerFactory.getLogger(PrepareDataActivity.class);
 
-    public static final String SAVED_STATE_SCREEN_SHOT_FRAGMENT = "SAVED_STATE_SCREEN_SHOT_FRAGMENT";
-    public static final String SAVED_STATE_LOG_EDIT_FRAGMENT = "SAVED_STATE_LOG_EDIT_FRAGMENT";
-
     private ScreenShotFragment screenShotFragment;
     private LogEditFragment logEditFragment;
     private Menu menu;
@@ -50,25 +47,26 @@ public class PrepareDataActivity extends ActionBarActivity implements ActionBar.
         supportActionBar.setNavigationMode(ActionBar.NAVIGATION_MODE_TABS);
         supportActionBar.setHomeButtonEnabled(true);
 
-        final Bundle screenShotFragmentArguments = new Bundle();
-        final Bundle logFragmentArguments = new Bundle();
+        if (savedInstanceState == null) {
 
-        screenShotFragmentArguments.putString(ScreenShotFragment.ARGUMENT_SCREEN_SHOT_URI, getIntent().getStringExtra(ScreenShotFragment.ARGUMENT_SCREEN_SHOT_URI));
-        logFragmentArguments.putString(LogEditFragment.ARGUMENT_LOGS_URI, getIntent().getStringExtra(LogEditFragment.ARGUMENT_LOGS_URI));
+            final Bundle screenShotFragmentArguments = new Bundle();
+            final Bundle logFragmentArguments = new Bundle();
 
-        screenShotFragment = (ScreenShotFragment) Fragment.instantiate(this, ScreenShotFragment.class.getName(), screenShotFragmentArguments);
-        logEditFragment = (LogEditFragment) Fragment.instantiate(this, LogEditFragment.class.getName(), logFragmentArguments);
+            screenShotFragmentArguments.putString(ScreenShotFragment.ARGUMENT_SCREEN_SHOT_URI, getIntent().getStringExtra(ScreenShotFragment.ARGUMENT_SCREEN_SHOT_URI));
+            logFragmentArguments.putString(LogEditFragment.ARGUMENT_LOGS_URI, getIntent().getStringExtra(LogEditFragment.ARGUMENT_LOGS_URI));
 
-        getSupportFragmentManager()
-                .beginTransaction()
-                .add(android.R.id.content, screenShotFragment, "screenShotFragment")
-                .add(android.R.id.content, logEditFragment, "logEditFragment")
-                .commit();
+            screenShotFragment = (ScreenShotFragment) Fragment.instantiate(this, ScreenShotFragment.class.getName(), screenShotFragmentArguments);
+            logEditFragment = (LogEditFragment) Fragment.instantiate(this, LogEditFragment.class.getName(), logFragmentArguments);
 
-        if (savedInstanceState != null) {
-            savedInstanceState.setClassLoader(getClassLoader());
-            screenShotFragment.setInitialSavedState((Fragment.SavedState) savedInstanceState.getParcelable(SAVED_STATE_SCREEN_SHOT_FRAGMENT));
-            logEditFragment.setInitialSavedState((Fragment.SavedState) savedInstanceState.getParcelable(SAVED_STATE_LOG_EDIT_FRAGMENT));
+            getSupportFragmentManager()
+                    .beginTransaction()
+                    .add(android.R.id.content, screenShotFragment, "screenShotFragment")
+                    .add(android.R.id.content, logEditFragment, "logEditFragment")
+                    .commit();
+
+        } else {
+            screenShotFragment = (ScreenShotFragment) getSupportFragmentManager().findFragmentByTag("screenShotFragment");
+            logEditFragment = (LogEditFragment) getSupportFragmentManager().findFragmentByTag( "logEditFragment");
         }
 
         supportActionBar.setDisplayHomeAsUpEnabled(true);
@@ -82,22 +80,11 @@ public class PrepareDataActivity extends ActionBarActivity implements ActionBar.
         supportActionBar.getTabAt(0).select();
     }
 
-    @Override
-    protected void onSaveInstanceState(Bundle outState) {
-        super.onSaveInstanceState(outState);
-        final Fragment.SavedState screenShotFragmentState = getSupportFragmentManager().saveFragmentInstanceState(screenShotFragment);
-        final Fragment.SavedState logEditFragmentState = getSupportFragmentManager().saveFragmentInstanceState(logEditFragment);
-
-        outState.setClassLoader(getClassLoader());
-        outState.putParcelable(SAVED_STATE_SCREEN_SHOT_FRAGMENT, screenShotFragmentState);
-        outState.putParcelable(SAVED_STATE_LOG_EDIT_FRAGMENT, logEditFragmentState);
-    }
-
     private void share() {
         final Bitmap picture = screenShotFragment.saveResult();
         try {
-            File pictureFile = IOUtils.writeBitmap(getApplicationContext(), picture, IOUtils.DEFAULT_SCREEN_SHOT_PATH);
-            File logFile = IOUtils.writeLogs(getApplicationContext(), logEditFragment.getResult(), IOUtils.DEFAULT_LOG_PATH);
+            File pictureFile = IOUtils.writeBitmap(getApplicationContext(), picture, IOUtils.DEFAULT_DIR + "/" + "modified_picture.png");
+            File logFile = IOUtils.writeLogs(getApplicationContext(), logEditFragment.getResult(), IOUtils.DEFAULT_DIR + "/" + "modified_logs.txt");
 
             ReportData.getInstance().erase();
             ReportData.getInstance().setScreenShotPath(pictureFile.getPath());
@@ -111,11 +98,11 @@ public class PrepareDataActivity extends ActionBarActivity implements ActionBar.
     }
 
     private void showLogFragment(FragmentTransaction fragmentTransaction) {
-        fragmentTransaction.hide(screenShotFragment).show(logEditFragment);
+        fragmentTransaction.show(logEditFragment).hide(screenShotFragment);
     }
 
     private void showScreenShotFragment(FragmentTransaction fragmentTransaction) {
-        fragmentTransaction.hide(logEditFragment).show(screenShotFragment);
+        fragmentTransaction.show(screenShotFragment).hide(logEditFragment);
     }
 
     @Override

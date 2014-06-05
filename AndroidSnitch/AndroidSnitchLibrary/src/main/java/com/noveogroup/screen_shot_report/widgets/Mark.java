@@ -37,7 +37,7 @@ public class Mark implements Parcelable {
         dest.writeList(points);
     }
 
-    public static Creator<Mark> CREATOR = new Creator<Mark>() {
+    public static final Creator<Mark> CREATOR = new Creator<Mark>() {
         @Override
         public Mark createFromParcel(Parcel source) {
             final Mark mark = new Mark();

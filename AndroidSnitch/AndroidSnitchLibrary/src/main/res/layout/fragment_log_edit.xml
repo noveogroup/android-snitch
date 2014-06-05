@@ -3,8 +3,7 @@
 <LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
     android:orientation="vertical"
     android:layout_width="match_parent"
-    android:layout_height="match_parent"
-    android:background="#000000">
+    android:layout_height="match_parent">
 
     <LinearLayout
         android:layout_width="match_parent"
@@ -15,14 +14,14 @@
             android:id="@+id/cut_before"
             android:layout_width="0dp"
             android:layout_height="wrap_content"
-            android:text="Cut before"
+            android:text="@string/cut_before"
             android:layout_weight="1" />
 
         <Button
             android:id="@+id/cut_after"
             android:layout_width="0dp"
             android:layout_height="wrap_content"
-            android:text="Cut after"
+            android:text="@string/cut_after"
             android:layout_weight="1"/>
 
     </LinearLayout>

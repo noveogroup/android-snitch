@@ -13,6 +13,8 @@ import com.noveogroup.screen_shot_report.widgets.ImageMoveResize;
 import com.noveogroup.screen_shot_report.widgets.Mark;
 import com.noveogroup.screen_shot_report.widgets.MarkView;
 
+import java.util.ArrayList;
+
 /**
  * Created by oisupov on 4/5/14.
  */
@@ -45,7 +47,8 @@ public class ScreenShotFragment extends Fragment {
 
         if (savedInstanceState != null) {
             savedInstanceState.setClassLoader(getActivity().getClassLoader());
-            markView.setMarks(savedInstanceState.<Mark>getParcelableArrayList(KEY_MARKS));
+            ArrayList<Mark> marks = savedInstanceState.<Mark>getParcelableArrayList(KEY_MARKS);
+            markView.setMarks(marks);
         }
 
         imageMoveResize = new ImageMoveResize(markView);
@@ -108,7 +111,6 @@ public class ScreenShotFragment extends Fragment {
             edit.setPressed(false);
         }
     }
-
 
     @Override
     public void onSaveInstanceState(Bundle outState) {

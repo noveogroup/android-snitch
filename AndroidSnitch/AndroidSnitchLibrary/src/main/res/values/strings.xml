@@ -37,6 +37,8 @@
     <string name="compose">Compose</string>
     <string name="prepare">Prepare</string>
     <string name="report_crash">Report crash</string>
+    <string name="cut_before">Cut before</string>
+    <string name="cut_after">Cut after</string>
 
     <string-array name="share_options">
         <item>send by mail</item>
